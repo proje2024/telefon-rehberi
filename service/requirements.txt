@@ -1,0 +1,6 @@
+requests
+sqlalchemy
+python-dotenv
+python-jose
+psycopg2-binary
+python-multipart

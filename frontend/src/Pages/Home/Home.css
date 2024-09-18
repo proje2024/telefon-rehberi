@@ -1,0 +1,55 @@
+.home-main-container {
+  display: flex; /* Enables flexbox layout for side-by-side containers */
+  flex-direction: row; /* Ensures child elements are aligned in a row */
+  padding-top: 64px; /* Navbar height, leaving space at the top */
+  padding-left: 0;
+  padding-right: 0;
+  height: calc(100vh - 64px); /* Full height minus navbar height */
+  border-radius: 15px; /* Rounds the corners */
+  overflow: hidden; /* Ensures the child elements are clipped to the rounded corners */
+}
+
+.phone-tree-container {
+  max-width: 30%;
+  flex: 1; /* Allows this container to grow and fill the available space equally */
+  padding: 10px;
+  margin: 0;
+  overflow-y: auto; /* Scroll if content overflows */
+  display: flex;
+  flex-direction: column; /* Aligns contents vertically */
+}
+
+.user-info-container {
+  flex: 1; /* Allows this container to grow and fill the available space equally */
+  padding: 20px;
+  color: white;
+  overflow-y: auto; /* Scroll if content overflows */
+}
+
+.custom-textfield {
+  background-color: #395B64; /* Background color */
+  margin-bottom: 10px !important;
+  border-radius: 15px; /* Rounds the corners */
+}
+
+.custom-textfield input::placeholder {
+  color: white; /* Placeholder text color */
+}
+
+.custom-textfield .MuiOutlinedInput-root {
+  border-radius: 15px; /* Rounds the corners */
+  background-color: #395B64; /* Background color */
+}
+
+.custom-textfield .MuiOutlinedInput-notchedOutline {
+  border-color: transparent; /* Hide the default border */
+}
+
+.custom-textfield .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: white; /* Set the border color when focused */
+}
+
+.user-info-tabs {
+  display: flex;
+  justify-content: center; /* Bu, tab'ları yatayda ortalar */
+}

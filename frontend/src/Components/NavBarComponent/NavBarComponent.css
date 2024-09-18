@@ -1,0 +1,18 @@
+.styled-toolbar {
+    display: flex !important;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.styled-right-toolbar {
+    justify-content: flex-end !important;
+    flex-grow: 1;
+    display: flex;
+}
+
+.main-app-name {
+    font-size: 40px;
+    font-style: normal;
+    font-weight: 1000;
+
+}

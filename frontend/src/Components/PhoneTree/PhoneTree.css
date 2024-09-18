@@ -1,0 +1,51 @@
+/* PhoneTree.css */
+
+/* Container for the phone tree with rounded corners */
+.custom-tree-container {
+  border-radius: 15px; /* Adjust the border-radius as needed */
+  overflow: hidden; /* Ensures that the rounded corners are applied to the content */
+  background-color: #395B64; /* Background color */
+  padding: 10px;
+  overflow-y: auto; 
+  height: auto; /* Adjust height based on content */
+  max-height: 100vh; /* Optional: limit max height to viewport height */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Optional: add shadow for better visibility */
+}
+
+/* Ant Design tree styles */
+.custom-tree {
+  border-radius: 15px; /* Matches the container border-radius */
+}
+
+/* Node content styles */
+.custom-tree .ant-tree-node-content-wrapper {
+  color: white;  /* Text color */
+}
+
+/* Title styles */
+.custom-tree .ant-tree-title {
+  color: white !important;  /* Title color */
+}
+
+/* Icon color */
+.custom-tree .ant-tree-icon {
+  color: white;
+}
+
+/* Expand/collapse icon styles */
+.custom-tree .ant-tree-switcher {
+  color: white;
+  border-color: white;  /* Border color */
+}
+
+/* Selected node background color */
+.custom-tree .ant-tree-node-selected {
+  background-color: #A5C9CA !important; /* Background color */
+  color: white !important; /* Text color */
+}
+
+/* Hover effect */
+.custom-tree .ant-tree-treenode:hover {
+  background-color: #A5C9CA; /* Hover background color */
+  color: white; /* Hover text color */
+}

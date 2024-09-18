@@ -1,0 +1,59 @@
+body {
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #2C3333;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+* {
+  font-family: 'Arial', sans-serif !important;
+  font-style: normal !important;
+}
+
+/* :root {
+  --text-color: #000000 !important;
+  --secondary-color: #bb8d7e !important;
+  --node-bg: #e0f0ff !important;
+  --item-bg: #f9f9f9 !important;
+  --button-hover-color: #77b1e7 !important;
+  --highlight-color: #88beff;
+  --item-border-color: #ccc;
+  --item-hover-color: #94bceb !important;
+  --edit-icon-hover: #ffffff !important;
+
+  --dark-bg-color: #2f4f4f !important;
+  --dark-primary-color: #556b2f !important;
+  --dark-secondary-color: #8b4513 !important;
+  --dark-border-color: #6b8e23 !important;
+
+  --error-color: red;
+
+  --button-bg-color: #4096ff !important;
+
+} */
+
+:root , .dark-mode {
+  --text-color: #ffffff !important;
+  --secondary-color: #bb8d7e !important;
+  /* --node-bg: #b5a4a4 !important; */
+  --node-bg: #6a89a7!important;
+  --item-bg: #535353 !important;
+  --item-border-color: #535353;
+  --item-hover-color: #b7c8db !important;
+  --edit-icon-hover: #000000 !important;
+
+  --dark-bg-color: #2f4f4f !important;
+  --dark-primary-color: #556b2f !important;
+  --dark-secondary-color: #8b4513 !important;
+  --dark-border-color: #6b8e23 !important;
+
+  --error-color: red;
+
+  --button-bg-color: #6a89a7 !important;
+  --button-hover-color: #88beff !important;
+  --highlight-color: #88beff;
+}

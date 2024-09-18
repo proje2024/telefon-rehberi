@@ -1,0 +1,118 @@
+/* Container Styling */
+.user-info {
+  margin-top: 3%;
+  background-color: #2f4b52;
+  border-radius: 15px;
+}
+
+/* Edit Button */
+.user-info .edit-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #A5C9CA;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 15px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.user-info .edit-button:hover {
+  background-color: #E7F6F2;
+  color: #000;
+}
+
+
+.ant-table {
+  background-color: #2f4b52;
+  color: white;
+}
+
+/* Başlık ve Hücre Arka Plan Renkleri */
+.ant-table-thead > tr > th {
+  background-color: #395B64;
+  color: white;
+}
+
+/* Satır Arka Plan Renkleri */
+.ant-table-tbody > tr > td {
+  background-color: #2f4b52;
+  color: white;
+}
+
+.ant-checkbox-wrapper {
+  font-size: 16px;
+  color: white;
+}
+
+/* Satır Hover Renkleri */
+.ant-table-tbody > tr.ant-table-row:hover > td {
+  background-color: #A5C9CA;
+  color: black;
+}
+
+/* İç içe Tabloların Arka Plan Renkleri */
+.ant-table-expanded-row {
+  background-color: #2f4b52;
+  color: white;
+}
+
+/* Modal Stili (Varsa) */
+.ant-modal-content {
+  background-color: #1c1c1c;
+  color: #fff;
+}
+
+.ant-modal-header,
+.ant-modal-footer {
+  background-color: #1c1c1c;
+}
+
+.ant-btn-primary {
+  background-color: #4a4a4a;
+  border-color: #4a4a4a;
+}
+
+.ant-btn {
+  color: #fff;
+
+}
+
+.dark-modal .ant-modal-content {
+  background-color: #1c1c1c;
+  color: #fff;
+}
+
+.dark-modal .ant-modal-header,
+.dark-modal .ant-modal-footer {
+  background-color: #1c1c1c;
+}
+
+.dark-modal .ant-modal-title {
+  color: #fff;
+}
+
+.dark-modal .ant-btn-primary {
+  background-color: #4a4a4a;
+  border-color: #4a4a4a;
+}
+
+.dark-modal .ant-btn {
+  color: #fff;
+}
+.cancel-button {
+  background-color: #ff4d4f;
+  border: none;
+  color: white;
+}
+
+.cancel-button:hover {
+  background-color: #ff7875;
+  color: white;
+}
+
+.ant-form-item .ant-form-item-label > label{
+  color: white;
+}

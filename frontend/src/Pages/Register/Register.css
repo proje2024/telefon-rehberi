@@ -1,0 +1,78 @@
+.register-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.register-header {
+    font-size: 100px;
+    font-family: 'Passion One', sans-serif !important;
+    font-weight: 700;
+    font-style: normal;
+    margin-top: 90px;
+}
+
+.register-form {
+    display: flex;
+    flex-direction: column;
+    max-width: 360px;
+}
+
+.register-form-button {
+    width: 100%;
+    background-color: var(--button-bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    margin-top: 20px !important;
+}
+
+.register-form-button:hover {
+    background-color: var(--button-hover-color) !important;
+}
+
+.login-link {
+    display: flex;
+    justify-content: center;
+    color: var(--text-color);
+}
+
+.login-link a {
+    color: var(--text-color);
+    text-decoration: none;
+}
+
+.login-link a:hover {
+    color: var(--button-bg-color);
+}
+
+.app.dark .register-container {
+    background-color: var(--dark-bg-color);
+    color: var(--text-color);
+}
+
+.app.dark .register-header {
+    color: var(--dark-primary-color);
+}
+
+.app.dark .register-form-button {
+    background-color: var(--dark-primary-color);
+    color: var(--text-color);
+    border: 1px solid var(--dark-border-color);
+}
+
+.app.dark .register-form-button:hover {
+    background-color: var(--dark-secondary-color);
+}
+
+.app.dark .login-link {
+    color: var(--dark-primary-color);
+}
+
+.app.dark .login-link a {
+    color: var(--dark-primary-color);
+}
+
+.app.dark .login-link a:hover {
+    color: var(--dark-secondary-color);
+}

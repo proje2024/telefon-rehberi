@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ${DEPLOYMENT_NAME}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ${APP_NAME}
+  template:
+    metadata:
+      labels:
+        app: ${APP_NAME}
+    spec:
+      containers:
+        - name: ${CONTAINER_NAME}
+          image: ${IMAGE_NAME}:${IMAGE_VERSION}
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: NGINX_HOST
+              value: "${NGINX_HOST}"
+            - name: NGINX_PORT
+              value: "${NGINX_PORT}"
+            - name: NGINX_LISTEN
+              value: "${NGINX_LISTEN}"
+            - name: NGINX_SERVER_NAME
+              value: "${NGINX_SERVER_NAME}"
+          ports:
+            - containerPort: ${DOCKER_INTERNAL_PORT}

@@ -1,0 +1,83 @@
+.login-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 360px;
+}
+
+.login-header {
+    font-family: Passion One, sans-serif !important;
+    font-size: 100px;
+    font-style: normal;
+    font-weight: 700;
+    margin-top: 200px;
+}
+
+.login-form-button {
+    width: 100%;
+    background-color: #395B64;
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    margin-top: 10px !important;
+}
+
+.login-form-button:hover {
+    background-color: var(--button-hover-color) !important;
+}
+
+.register-link {
+    text-align: center;
+    color: var(--text-color);
+}
+
+.register-link a {
+    color: var(--text-color);
+    text-decoration: none;
+}
+
+.register-link a:hover {
+    color: var(--button-bg-color);
+}
+
+.login-error-text {
+    color: var(--error-color);
+    text-align: center;
+}
+
+.app.dark .login-container {
+    background-color: var(--dark-bg-color);
+    color: var(--text-color);
+}
+
+.app.dark .login-header {
+    color: var(--dark-primary-color);
+}
+
+.app.dark .login-form-button {
+    background-color: var(--dark-primary-color);
+    color: var(--text-color);
+    border: 1px solid var(--dark-border-color);
+}
+
+.app.dark .login-form-button:hover {
+    background-color: var(--dark-secondary-color);
+}
+
+.app.dark .register-link {
+    color: var(--dark-primary-color);
+}
+
+.app.dark .register-link a {
+    color: var(--dark-primary-color);
+}
+
+.app.dark .register-link a:hover {
+    color: var(--dark-secondary-color);
+}

@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ${SERVICE_NAME}
+spec:
+  selector:
+    app: ${APP_NAME}
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: ${EXTERNAL_PORT}
+      targetPort: ${DOCKER_INTERNAL_PORT}
+      nodePort: ${FRONTEND_NODE_PORT}
