@@ -140,8 +140,6 @@ Proje dizininde, Dockerfile'ları kullanarak gerekli Docker imajlarını oluştu
   docker build -t rehber-frontend:v.10.09.24.1 -f ./frontend/Dockerfile .
 
   docker build -t rehber-service:v.10.09.24.1 -f ./service/Dockerfile .
-   ```envsubst < kubernetes/backend/backend-deployment.yaml | kubectl apply -f -
-
 
 Oluşturduğunuz docker image'leri minikube içindeki docker ortamına yükleyin. Örneğin:
 
