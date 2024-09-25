@@ -22,7 +22,11 @@ def build_tree(
         directories: List[Directory],
         hiyerarcy_dict: dict[int, Hierarchy]
 ):
-    root_nodes = [directory for directory in directories if directory.ataId is None]
+    try:
+        root_nodes = [directory for directory in directories if directory.ataId is None]
+    except Exception as e:
+        print(f"RootNode alınırken bir hata oluştu: {str(e)}")
+        raise HTTPException(status_code=500, detail="Veritabanından veri alınırken bir hata oluştu.")
     tree = build_subtree(root_nodes, directories, hiyerarcy_dict)
     return tree
 
