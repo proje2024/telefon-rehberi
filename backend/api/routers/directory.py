@@ -2,7 +2,7 @@ from sqlalchemy import Column, null, or_, and_
 from fastapi import FastAPI, status, HTTPException, Depends, APIRouter, File, UploadFile
 from sqlalchemy.orm import Session, joinedload
 from api.deps import get_db, get_current_user
-from api.db.models import Directory,Hierarchy, SubscriptionTypes, Sub_Directory, DynamicColumn, DynamicColumnData, User
+from api.db.models import Directory, SubscriptionTypes, Sub_Directory, DynamicColumn, DynamicColumnData, User
 from api.schemas import DirectoryEditV, SubscriptionEditV, SubscriptionCreateV, SubDirectoryCreateV, SubDirectoryEditV, DynamicColumnCreateV, DynamicColumnEditV
 from typing import List, Dict, Any
 import os
@@ -20,31 +20,28 @@ router = APIRouter()
 
 def build_tree(
         directories: List[Directory],
-        hiyerarcy_dict: dict[int, Hierarchy]
 ):
     try:
         root_nodes = [directory for directory in directories if directory.ataId is None]
     except Exception as e:
         print(f"RootNode alınırken bir hata oluştu: {str(e)}")
         raise HTTPException(status_code=500, detail="Veritabanından veri alınırken bir hata oluştu.")
-    tree = build_subtree(root_nodes, directories, hiyerarcy_dict)
+    tree = build_subtree(root_nodes, directories)
     return tree
 
 def build_subtree(
         parent_nodes: List[Directory],
         all_nodes: List[Directory],
-        hiyerarcy_dict: dict[int, Hierarchy]
 ):
     subtree = []
 
     for parent in parent_nodes:
         child_nodes = [node for node in all_nodes if node.ataId == parent.id]
-        hierarcy = hiyerarcy_dict.get(parent.hiyerid, None)
 
         node = {
             'id': parent.id,
-            'title': hierarcy.adi if hierarcy else '',
-            'children': build_subtree(child_nodes, all_nodes, hiyerarcy_dict)
+            'title': parent.adi,
+            'children': build_subtree(child_nodes, all_nodes)
         }
         subtree.append(node)
 
@@ -57,14 +54,11 @@ async def get_tree(
 ):
     try:
         directories = db.query(Directory).all()
-        hierarcies = db.query(Hierarchy).all()
     except Exception as e:
         print(f"Veritabanından veri alınırken bir hata oluştu: {str(e)}")
         raise HTTPException(status_code=500, detail="Veritabanından veri alınırken bir hata oluştu.")
 
-    hiyerarcy_dict = {hiyerarcy.id: hiyerarcy for hiyerarcy in hierarcies}
-
-    result = build_tree(directories, hiyerarcy_dict)
+    result = build_tree(directories)
     return result
 
 @router.get("/getTreeForUser", summary="List all")
@@ -73,17 +67,13 @@ async def get_tree_for_user(
     user: User = Depends(get_current_user)  # Ensure the user is authenticated
 ):
     try:
-        hierarcies = db.query(Hierarchy).filter(Hierarchy.visibility == 1).all()
-        visible_hiyer_ids = {hiyerarcy.id for hiyerarcy in hierarcies}
-
-        directories = db.query(Directory).filter(Directory.hiyerid.in_(visible_hiyer_ids)).all()
-        hiyerarcy_dict = {hiyerarcy.id: hiyerarcy for hiyerarcy in hierarcies}
+        visible_directory = db.query(Directory).filter(Directory.visibility == 1).all()
 
     except Exception as e:
         print(f"Veritabanından veri alınırken bir hata oluştu: {str(e)}")
         raise HTTPException(status_code=500, detail="Veritabanından veri alınırken bir hata oluştu.")
     
-    result = build_tree(directories, hiyerarcy_dict)
+    result = build_tree(visible_directory)
     return result
 
 @router.post("/editNode", summary="Edit Node")
@@ -93,9 +83,7 @@ async def edit_node(
     user: User = Depends(get_current_user)  # Ensure the user is authenticated
 ):
 
-    directory = db.query(Directory).filter(Directory.id == node_data.id).first()
-
-    db_node = db.query(Hierarchy).filter(Hierarchy.id == directory.hiyerid).first()
+    db_node = db.query(Directory).filter(Directory.id == node_data.id).first()
     if not db_node:
         raise HTTPException(status_code=400, detail="Node not found")
 
@@ -172,16 +160,22 @@ async def get_node(
 ) -> Dict:
     def get_node_and_subnodes(node_id: int) -> Dict:
         # Fetch the node
-        directory = db.query(Directory).filter(Directory.id == node_id).first()
+        
+        query = db.query(Directory).filter(Directory.id == node_id)
+
+        # Eğer user.role == 2 ise, sadece visibility == 1 olanları sorgula
+        if user.role == 2:
+            query = query.filter(Directory.visibility == 1)
+       
+        directory = query.first()
+
         dynamic_column = db.query(DynamicColumn).all()
 
         if not directory:
             return {"id": node_id, "children": []}
 
-        # Fetch the hierarchy and subscription details
-        hierarchy = db.query(Hierarchy).filter(Hierarchy.id == directory.hiyerid).first()
-        internal_subscription = db.query(SubscriptionTypes).filter(SubscriptionTypes.id == hierarchy.internal_number_subscription_id).first()
-        ip_subscription = db.query(SubscriptionTypes).filter(SubscriptionTypes.id == hierarchy.ip_number_subscription_id).first()
+        internal_subscription = db.query(SubscriptionTypes).filter(SubscriptionTypes.id == directory.internal_number_subscription_id).first()
+        ip_subscription = db.query(SubscriptionTypes).filter(SubscriptionTypes.id == directory.ip_number_subscription_id).first()
         
         dynamic_columns_response = []
         dynamic_column_data = db.query(DynamicColumnData).filter(DynamicColumnData.tableid == 1, DynamicColumnData.recordid == directory.id).all()
@@ -197,17 +191,17 @@ async def get_node(
         # Prepare the node data
         node_data = {
             "id": directory.id,
-            "adi": hierarchy.adi,
-            "internal_number_area_code": hierarchy.internal_number_area_code,
-            "internal_number": hierarchy.internal_number,
-            "ip_number_area_code": hierarchy.ip_number_area_code,
-            "ip_number": hierarchy.ip_number,
-            "mailbox": hierarchy.mailbox,
-            "visibility": hierarchy.visibility,
-            "visibilityForSubDirectory": hierarchy.visibilityForSubDirectory,
-            "internal_number_subscription_id": hierarchy.internal_number_subscription_id,
+            "adi": directory.adi,
+            "internal_number_area_code": directory.internal_number_area_code,
+            "internal_number": directory.internal_number,
+            "ip_number_area_code": directory.ip_number_area_code,
+            "ip_number": directory.ip_number,
+            "mailbox": directory.mailbox,
+            "visibility": directory.visibility,
+            "visibilityForSubDirectory": directory.visibilityForSubDirectory,
+            "internal_number_subscription_id": directory.internal_number_subscription_id,
             "internal_subscription": internal_subscription.subscription_types if internal_subscription is not None else "-",
-            "ip_number_subscription_id": hierarchy.ip_number_subscription_id,
+            "ip_number_subscription_id": directory.ip_number_subscription_id,
             "ip_subscription": ip_subscription.subscription_types if ip_subscription is not None else "-",
             "dynamicColumns": dynamic_columns_response,
             "children": []  # Initialize the children
@@ -215,7 +209,16 @@ async def get_node(
 
 
         # Fetch and add child nodes
-        sub_directories = db.query(Directory).filter(Directory.ataId == directory.id).all()
+        
+
+        sub_query = db.query(Directory).filter(Directory.ataId == directory.id)
+
+        # Eğer user.role == 2 ise, sadece visibility == 1 olanları sorgula
+        if user.role == 2:
+            sub_query = sub_query.filter(Directory.visibility == 1)
+       
+        sub_directories = sub_query.all()
+
         for sub_directory in sub_directories:
             sub_node_data = get_node_and_subnodes(sub_directory.id)
             node_data["children"].append(sub_node_data)
@@ -400,7 +403,13 @@ async def get_sub_directory(
 ):
     result = []
 
-    sub_direcories = db.query(Sub_Directory).filter(Sub_Directory.directoryid == id).all()
+    
+    query = db.query(Directory).filter(Directory.id == id)
+    if user.role == 2:
+        query = query.filter(Directory.visibility == 1, Directory.visibilityForSubDirectory == 1)
+        
+    directory = query.first()
+    sub_direcories = db.query(Sub_Directory).filter(Sub_Directory.directoryid == directory.id).all()
     dynamic_column = db.query(DynamicColumn).all()
 
     for subs in sub_direcories: 

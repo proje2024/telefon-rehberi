@@ -41,10 +41,12 @@ class SubscriptionTypes(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     subscription_types =  Column(Text, nullable=False)
 
-class Hierarchy(Base):
-    __tablename__ = "hiyerarcy"
+class Directory(Base):
+    __tablename__ = "directory"
 
-    id = Column(Text, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    hiyerid = Column(Text, nullable=True)
+    ataId = Column(Integer, ForeignKey("directory.id"), nullable=True)
     adi = Column(Text, nullable=False)
     hiyerAd = Column(Text, nullable=False)
     internal_number_area_code = Column(Text, nullable=True)
@@ -58,27 +60,8 @@ class Hierarchy(Base):
     visibilityForSubDirectory = Column(Integer, nullable=True, default=1)
 
     # Define explicit relationships
-    internal_subscription_type = relationship(
-        "SubscriptionTypes",
-        foreign_keys=[internal_number_subscription_id],
-        uselist=False
-    )
-    
-    ip_subscription_type = relationship(
-        "SubscriptionTypes",
-        foreign_keys=[ip_number_subscription_id],
-        uselist=False
-    )
-
-
-class Directory(Base):
-    __tablename__ = "directory"
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    hiyerid = Column(Text, ForeignKey("hiyerarcy.id"), nullable=True)
-    ataId = Column(Integer, ForeignKey("directory.id"), nullable=True)
-
-    hierarchy = relationship("Hierarchy")
+    internal_subscription_type = relationship("SubscriptionTypes",foreign_keys=[internal_number_subscription_id],    uselist=False)
+    ip_subscription_type = relationship("SubscriptionTypes",foreign_keys=[ip_number_subscription_id],    uselist=False)
     parent = relationship("Directory", remote_side=[id])
 
 

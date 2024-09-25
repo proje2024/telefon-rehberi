@@ -21,38 +21,19 @@ def insert_data_into_db(engine, data):
         with connection.begin():
             try:
                 for item in data:
-                    insert_hiyerarcy = text("""
-                    INSERT OR IGNORE INTO hiyerarcy (id, adi, hiyerAd, internal_number, ip_number, mailbox, visibility,visibilityForSubDirectory, ip_number_subscription_id, internal_number_subscription_id) 
-                    VALUES (:id, :adi, :hiyerAd, '', '', '', 1, 1, 1, 1)
-                    """)
-                    values_hiyerarcy = {'id': item['hiyerId'], 'adi': item['ad'], 'hiyerAd': item['hiyerAd']}
-                    connection.execute(insert_hiyerarcy, values_hiyerarcy)
-
-                    #Loglama
-                    print("Hierarchy bilgisi insert edildi!")
-                    print(f"Sql Insert Query: {insert_hiyerarcy} with values {values_hiyerarcy}")
 
                     insert_directory = text("""
-                    INSERT OR IGNORE INTO directory (id, hiyerId, ataId)
-                    VALUES (:id, :hiyerId, :ataId)
+                    INSERT OR IGNORE INTO directory (id, hiyerId, ataId, adi, hiyerAd, internal_number, ip_number, mailbox, 
+                                            visibility,visibilityForSubDirectory, ip_number_subscription_id, internal_number_subscription_id)
+                    VALUES (:id, :hiyerId, :ataId,:adi,:hiyerAd,  '', '', '', 1, 1, 1, 1)
                     """)
 
-                    values_directory = {'id': item['id'], 'hiyerId': item['hiyerId'], 'ataId': item['ataId']}
+                    values_directory = {'id': item['id'], 'hiyerId': item['hiyerId'], 'ataId': item['ataId'], 'adi': item['ad'], 'hiyerAd': item['hiyerAd']}
             
-                    check_hierarchy = text("""
-                        SELECT COUNT(*)
-                        FROM hiyerarcy
-                        WHERE id = :id
-                    """)
-
-                    result = connection.execute(check_hierarchy, {"id": item['hiyerId']})
-                    count = result.scalar()
-
-                    if count > 0:
-                        connection.execute(insert_directory, values_directory)
-                        #Loglama
-                        print("Directory bilgisi insert edildi!")
-                        print(f"Sql Insert Query: {insert_directory} with values {values_directory}")
+                    connection.execute(insert_directory, values_directory)
+                    #Loglama
+                    print("Directory bilgisi insert edildi!")
+                    print(f"Sql Insert Query: {insert_directory} with values {values_directory}")
 
 
             except Exception as e:

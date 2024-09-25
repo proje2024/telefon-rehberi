@@ -34,27 +34,7 @@ def create_tables():
             subscription_types TEXT
         )
     ''')
-   
-    # Hiyerarşi tablosu oluştur
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS hiyerarcy (
-            id TEXT PRIMARY KEY,
-            adi TEXT,
-            hiyerAd TEXT,
-            internal_number_area_code TEXT,
-            internal_number TEXT,
-            internal_number_subscription_id INTEGER DEFAULT 1,
-            ip_number_area_code TEXT,
-            ip_number TEXT,
-            ip_number_subscription_id INTEGER DEFAULT 1,
-            mailbox TEXT,
-            visibility INTEGER DEFAULT 1,
-            visibilityForSubDirectory INTEGER DEFAULT 1,
-            FOREIGN KEY (internal_number_subscription_id) REFERENCES subscriptionTypes(id)
-            FOREIGN KEY (ip_number_subscription_id) REFERENCES subscriptionTypes(id)
-        )
-    ''')
-    
+       
     # Kullanıcılar tablosu oluştur
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
@@ -76,7 +56,19 @@ def create_tables():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             hiyerid TEXT,
             ataId INTEGER,
-            FOREIGN KEY (hiyerid) REFERENCES hiyerarcy(id),
+            adi TEXT,
+            hiyerAd TEXT,
+            internal_number_area_code TEXT,
+            internal_number TEXT,
+            internal_number_subscription_id INTEGER DEFAULT 1,
+            ip_number_area_code TEXT,
+            ip_number TEXT,
+            ip_number_subscription_id INTEGER DEFAULT 1,
+            mailbox TEXT,
+            visibility INTEGER DEFAULT 1,
+            visibilityForSubDirectory INTEGER DEFAULT 1,
+            FOREIGN KEY (internal_number_subscription_id) REFERENCES subscriptionTypes(id)
+            FOREIGN KEY (ip_number_subscription_id) REFERENCES subscriptionTypes(id)
             FOREIGN KEY (ataId) REFERENCES directory(id)
         )
     ''')
@@ -105,7 +97,7 @@ def create_tables():
         )
     ''')
 
-    # tableid (1 = hiyerarcy, 2 = sub_directory)
+    # tableid (1 = directory, 2 = sub_directory)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS dynamic_data (
             id INTEGER PRIMARY KEY AUTOINCREMENT,  

@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from api.utils import get_password_hash
 from .base import Base
-from .models import User, SubscriptionTypes, Hierarchy, Directory
+from .models import User, SubscriptionTypes
 import os
 from dotenv import load_dotenv
 

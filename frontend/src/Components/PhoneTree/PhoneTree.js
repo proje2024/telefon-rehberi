@@ -5,6 +5,7 @@ import './PhoneTree.css';  // Import CSS
 
 const PhoneTree = ({ data, searchTerm, onNodeSelect }) => {
     const [expandedKeys, setExpandedKeys] = useState([]);
+    const [selectedKeys, setSelectedKeys] = useState([]);  // Seçili node'u tutmak için state ekliyoruz
 
     const filterTree = (nodes, searchTerm) => {
         const normalizedSearchTerm = searchTerm
@@ -45,6 +46,7 @@ const PhoneTree = ({ data, searchTerm, onNodeSelect }) => {
             : [...expandedKeys, key];
 
         setExpandedKeys(newExpandedKeys);
+        setSelectedKeys([key]);  // Sadece son tıklanan node'u seçili yap
     };
 
     const onExpand = (expandedKeys) => {
@@ -54,15 +56,14 @@ const PhoneTree = ({ data, searchTerm, onNodeSelect }) => {
     return (
         <div className="custom-tree-container">
             <Tree
-                multiple
+                multiple={false}  // Birden fazla node seçimi engellendi
                 defaultExpandAll
                 treeData={filteredData}
                 showIcon
                 icon={<UserOutlined style={{ color: 'white' }} />}
                 onSelect={onSelect}
                 onExpand={onExpand}
-                // expandedKeys={expandedKeys}
-                selectable
+                selectedKeys={selectedKeys}  // Seçili olan node'un key'ini belirt
                 className="custom-tree"
                 blockNode
                 style={{backgroundColor: '#395B64'}}
