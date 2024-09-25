@@ -30,11 +30,11 @@ def insert_data_into_db(engine, data):
 
 
                     insert_directory = text("""
-                    INSERT OR IGNORE INTO directory (id, hiyerId, ataid)
-                    VALUES (:id, :hiyerId, :ataid)
+                    INSERT OR IGNORE INTO directory (id, hiyerId, ataId)
+                    VALUES (:id, :hiyerId, :ataId)
                     """)
 
-                    values_directory = {'id': item['id'], 'hiyerId': item['hiyerId'], 'ataid': item['ataid']}
+                    values_directory = {'id': item['id'], 'hiyerId': item['hiyerId'], 'ataId': item['ataId']}
             
                     check_hierarchy = text("""
                         SELECT COUNT(*)

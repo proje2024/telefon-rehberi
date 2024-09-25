@@ -76,7 +76,7 @@ class Directory(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     hiyerid = Column(Text, ForeignKey("hiyerarcy.id"), nullable=True)
-    ataid = Column(Integer, ForeignKey("directory.id"), nullable=True)
+    ataId = Column(Integer, ForeignKey("directory.id"), nullable=True)
 
     hierarchy = relationship("Hierarchy")
     parent = relationship("Directory", remote_side=[id])

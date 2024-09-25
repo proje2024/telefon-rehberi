@@ -75,9 +75,9 @@ def create_tables():
         CREATE TABLE IF NOT EXISTS directory (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             hiyerid TEXT,
-            ataid INTEGER,
+            ataId INTEGER,
             FOREIGN KEY (hiyerid) REFERENCES hiyerarcy(id),
-            FOREIGN KEY (ataid) REFERENCES directory(id)
+            FOREIGN KEY (ataId) REFERENCES directory(id)
         )
     ''')
 

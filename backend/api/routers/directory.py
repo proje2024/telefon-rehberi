@@ -22,7 +22,7 @@ def build_tree(
         directories: List[Directory],
         hiyerarcy_dict: dict[int, Hierarchy]
 ):
-    root_nodes = [directory for directory in directories if directory.ataid is None]
+    root_nodes = [directory for directory in directories if directory.ataId is None]
     tree = build_subtree(root_nodes, directories, hiyerarcy_dict)
     return tree
 
@@ -34,7 +34,7 @@ def build_subtree(
     subtree = []
 
     for parent in parent_nodes:
-        child_nodes = [node for node in all_nodes if node.ataid == parent.id]
+        child_nodes = [node for node in all_nodes if node.ataId == parent.id]
         hierarcy = hiyerarcy_dict.get(parent.hiyerid, None)
 
         node = {
@@ -201,7 +201,7 @@ async def get_node(
 
 
         # Fetch and add child nodes
-        sub_directories = db.query(Directory).filter(Directory.ataid == directory.id).all()
+        sub_directories = db.query(Directory).filter(Directory.ataId == directory.id).all()
         for sub_directory in sub_directories:
             sub_node_data = get_node_and_subnodes(sub_directory.id)
             node_data["children"].append(sub_node_data)

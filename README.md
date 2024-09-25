@@ -30,21 +30,21 @@ telefon-rehberi/.env dosyasındaki SERVICE_URL ifadesini pozisyon bilgilerini al
 [
 {
 "ad": "CEO",
-"ataid": null,
+"ataId": null,
 "hiyerAd": "CEO",
 "hiyerId": "1",
 "id": 1
 },
 {
 "ad": "CFO",
-"ataid": 1,
+"ataId": 1,
 "hiyerAd": "CEO/CFO",
 "hiyerId": "1.1",
 "id": 2
 },
 {
 "ad": "CTO",
-"ataid": 1,
+"ataId": 1,
 "hiyerAd": "CEO/CTO",
 "hiyerId": "1.2",
 "id": 3
