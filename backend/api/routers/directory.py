@@ -49,10 +49,15 @@ def build_subtree(
 @router.get("/getTree", summary="List all")
 async def get_tree(
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_user)  # Ensure the user is authenticated
+    user: User = Depends(get_current_user)
 ):
-    directories = db.query(Directory).all()
-    hierarcies = db.query(Hierarchy).all()
+    try:
+        directories = db.query(Directory).all()
+        hierarcies = db.query(Hierarchy).all()
+    except Exception as e:
+        print(f"Veritabanından veri alınırken bir hata oluştu: {str(e)}")
+        raise HTTPException(status_code=500, detail="Veritabanından veri alınırken bir hata oluştu.")
+
     hiyerarcy_dict = {hiyerarcy.id: hiyerarcy for hiyerarcy in hierarcies}
 
     result = build_tree(directories, hiyerarcy_dict)
@@ -63,12 +68,17 @@ async def get_tree_for_user(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user)  # Ensure the user is authenticated
 ):
-    hierarcies = db.query(Hierarchy).filter(Hierarchy.visibility == 1).all()
-    visible_hiyer_ids = {hiyerarcy.id for hiyerarcy in hierarcies}
+    try:
+        hierarcies = db.query(Hierarchy).filter(Hierarchy.visibility == 1).all()
+        visible_hiyer_ids = {hiyerarcy.id for hiyerarcy in hierarcies}
 
-    directories = db.query(Directory).filter(Directory.hiyerid.in_(visible_hiyer_ids)).all()
-    hiyerarcy_dict = {hiyerarcy.id: hiyerarcy for hiyerarcy in hierarcies}
+        directories = db.query(Directory).filter(Directory.hiyerid.in_(visible_hiyer_ids)).all()
+        hiyerarcy_dict = {hiyerarcy.id: hiyerarcy for hiyerarcy in hierarcies}
 
+    except Exception as e:
+        print(f"Veritabanından veri alınırken bir hata oluştu: {str(e)}")
+        raise HTTPException(status_code=500, detail="Veritabanından veri alınırken bir hata oluştu.")
+    
     result = build_tree(directories, hiyerarcy_dict)
     return result
 
@@ -378,7 +388,6 @@ def add_sub_directory(
         db.rollback()
         raise HTTPException(status_code=500, detail="Database error occurred")
     
-    
 @router.get("/getSubDirectory/{id}", summary="Get SubDirectory")
 async def get_sub_directory(
     id: int, 
@@ -498,7 +507,6 @@ async def edit_sub_node(
         db.rollback()
         print(f"Error: {str(e)}")  # Enhanced logging for debugging
         raise HTTPException(status_code=500, detail="Database error occurred")
-
 
 @router.delete("/deleteSubDirectory/{id}", summary="Delete SubDirectory")
 async def delete_sub_Directory(

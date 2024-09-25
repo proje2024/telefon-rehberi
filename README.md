@@ -179,16 +179,29 @@ Oluşturduğunuz docker image'leri minikube içindeki docker ortamına yükleyin
       envsubst < kubernetes/data/data-deployment.yaml | kubectl apply -f -
       envsubst < kubernetes/data/data-service.yaml | kubectl apply -f -
      ```
+3. **Servislerin Durumunu Kontrol Edin:**
 
+   Kubernetes üzerinde servislerin durumunu kontrol etmek için:
 
+   ```bash
+   kubectl get pods
+   kubectl get services
+   ```
 
+   Bu komutlar, tüm pod'ların ve servislerin doğru bir şekilde çalışıp çalışmadığını gösterecektir.
 
+4. **Servislere Erişim:**
 
+   Minikube ile yerel olarak çalışan servislere erişmek için `minikube service` komutunu kullanabilirsiniz. Örneğin, API servisine erişmek için:
 
-kubectl get pods
-minikube ip
+   ```bash
+   minikube service api-service
+   ```
 
+5. **Logları İnceleyin:**
 
-örnek:
-kubectl delete deployment frontend-deployment
-kubectl delete service frontend-service
+   Herhangi bir sorunla karşılaşırsanız, pod loglarını incelemek için:
+
+   ```bash
+   kubectl logs <pod-name>
+   ```
