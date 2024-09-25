@@ -30,8 +30,7 @@ def insert_data_into_db(engine, data):
 
                     #Loglama
                     print("Hierarchy bilgisi insert edildi!")
-                    print("Sql Insert Query:" + insert_hiyerarcy)
-                    print("Hierarcy Values:" + values_hiyerarcy)
+                    print(f"Sql Insert Query: {insert_hiyerarcy} with values {values_hiyerarcy}")
 
                     insert_directory = text("""
                     INSERT OR IGNORE INTO directory (id, hiyerId, ataId)
@@ -53,8 +52,8 @@ def insert_data_into_db(engine, data):
                         connection.execute(insert_directory, values_directory)
                         #Loglama
                         print("Directory bilgisi insert edildi!")
-                        print("Sql Insert Query:" + insert_directory)
-                        print("Directory Values:" + values_directory)
+                        print(f"Sql Insert Query: {insert_directory} with values {values_directory}")
+
 
             except Exception as e:
                 print(f"Bir hata oluştu: {e}")
