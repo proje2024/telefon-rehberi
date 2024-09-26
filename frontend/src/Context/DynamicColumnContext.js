@@ -11,10 +11,11 @@ export const DynamicColumnProvider = ({ children }) => {
   const [dynamicColumn, setDynamicColumn] = useState([]);
   const [loadingDynamic, setLoading] = useState(false);
   const token = localStorage.getItem('token');
+  const [dynamicRefreshTrigger, setDynamicRefreshTrigger] = useState(false);
 
   useEffect(() => {
     fetchDynamicColumn();
-  }, []);
+  }, [dynamicRefreshTrigger]);
 
   const fetchDynamicColumn = async () => {
     setLoading(true);
@@ -55,24 +56,24 @@ export const DynamicColumnProvider = ({ children }) => {
   };
 
   const editDynamicColumn = async (id, updatedLabel) => {
-      try {
-        const response = await Axios.put(`/api/directory/editDynamicColumn`, {
-          id: id,
-          attribute_name: updatedLabel,
-        },
-        {
-            headers: {
-                'Authorization': `Bearer ${token}`,  // Token'ı başlıkta gönder
-                'Content-Type': 'application/json',
-            }
+    try {
+      const response = await Axios.put(`/api/directory/editDynamicColumn`, {
+        id: id,
+        attribute_name: updatedLabel,
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
         }
-      );
-        if (response.status === 200) {
-          await fetchDynamicColumn(); // Refresh the subscriptions list
-        }
-      } catch (error) {
-        alert('Error editing subscription');
+      });
+      if (response.status === 200) {
+        await fetchDynamicColumn(); 
+        setDynamicRefreshTrigger(prev => !prev); // refreshTrigger'ı tetikle
       }
+    } catch (error) {
+      alert('Error editing dynamic column');
+    }
   };
 
   const deleteDynamicColumn = async (id) => {
@@ -98,6 +99,7 @@ export const DynamicColumnProvider = ({ children }) => {
     addDynamicColumn,
     editDynamicColumn,
     deleteDynamicColumn,
+    dynamicRefreshTrigger,
   };
 
   return (

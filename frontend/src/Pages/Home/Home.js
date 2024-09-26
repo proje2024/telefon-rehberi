@@ -7,6 +7,7 @@ import PhoneTree from '../../Components/PhoneTree/PhoneTree';
 import UserInfo from '../../Components/UserInfo/UserInfo';
 import { TextField, CircularProgress, Alert } from '@mui/material';
 import axios from 'axios';
+import { useDynamicColumn } from '../../Context/DynamicColumnContext';
 
 function Home() {
     const [searchTerm, setSearchTerm] = useState('');
@@ -17,7 +18,7 @@ function Home() {
     const [userInfo, setUserInfo] = useState(null);
     const [tabValue, setTabValue] = useState(0);
     const token = localStorage.getItem('token');
-
+    const { dynamicColumn, dynamicRefreshTrigger } = useDynamicColumn(); // refreshTrigger'ı da alıyoruz
     const user = JSON.parse(localStorage.getItem("user"));
     const isRoleAdmin = user && user.role === 1;
 
@@ -64,8 +65,11 @@ function Home() {
     };
 
     useEffect(() => {
-        fetchOrganizationData();
-    }, []);
+        fetchOrganizationData(); // Reload the tree
+        if (selectedNode && selectedNode.id) {
+            fetchUserInfo(selectedNode.id); // Reload user info
+        }
+    }, [dynamicRefreshTrigger]);
 
     useEffect(() => {
         if (selectedNode && selectedNode.id) {

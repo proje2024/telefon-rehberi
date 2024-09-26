@@ -8,7 +8,7 @@ import { useDynamicColumn } from '../../Context/DynamicColumnContext';
 const CustomTree = ({ data, onEdit, onAddSubDirectory, isRoleAdmin, tabValue, subscriptions, onSaveSuccess, refreshTrigger }) => {
   const [expandedNodes, setExpandedNodes] = useState({});
   const [detailDataMap, setDetailDataMap] = useState({});
-  const { dynamicColumn } = useDynamicColumn();
+  const { dynamicColumn, dynamicRefreshTrigger } = useDynamicColumn(); // refreshTrigger'ı da alıyoruz
   const [selectedChild, setSelectedChild] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [form] = Form.useForm();
@@ -21,7 +21,7 @@ const CustomTree = ({ data, onEdit, onAddSubDirectory, isRoleAdmin, tabValue, su
         fetchDetailData(nodeId, false);
       }
     });
-  }, [refreshTrigger]);
+  }, [refreshTrigger, dynamicRefreshTrigger]);
 
   const prepareData = (nodes, dynamicColumns) => {
     return nodes.map(node => {
