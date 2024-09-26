@@ -227,6 +227,7 @@ const Navigation = () => {
       if (response.status === 200) {
         setRestoreMessage('Veritabanı başarıyla geri yüklendi.');
         message.success('Veritabanı başarıyla geri yüklendi.');
+        window.location.reload();
       } else {
         setRestoreMessage('Geri yükleme sırasında bir hata oluştu.');
         message.success('Geri yükleme sırasında bir hata oluştu.');
