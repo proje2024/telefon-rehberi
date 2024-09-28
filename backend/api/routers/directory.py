@@ -26,6 +26,7 @@ def build_tree(
     except Exception as e:
         print(f"RootNode alınırken bir hata oluştu: {str(e)}")
         raise HTTPException(status_code=500, detail="Veritabanından veri alınırken bir hata oluştu.")
+    print(f"RootNode: {str(root_nodes[0].id) ,root_nodes[0].adi,str(root_nodes[0].ataId)}")
     tree = build_subtree(root_nodes, directories)
     return tree
 
@@ -36,7 +37,11 @@ def build_subtree(
     subtree = []
 
     for parent in parent_nodes:
+        print(f"Parent Node: {str(parent.id),parent.adi,str(parent.ataId)}")
         child_nodes = [node for node in all_nodes if node.ataId == parent.id]
+        
+        if not child_nodes:
+            print(f"No child nodes found for parent node with id: {parent.id}")
 
         node = {
             'id': parent.id,
