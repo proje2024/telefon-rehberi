@@ -39,7 +39,7 @@ def insert_data_into_db(engine, data):
                         values_directory = {'id': item['id'], 'hiyerId': item['hiyerId'], 'ataId': item['ataId'], 'adi': item['ad'], 'hiyerAd': item['hiyerAd']}
                 
                         connection.execute(insert_directory, values_directory)
-                        print(f"Bu kayıt zaten var: {item['id'], item['ad']}")
+                        print(f"Yeni Bir kayıt Eklendi : {item['id'], item['ad'], item['ataId']}")
                     else:
                         print(f"Bu kayıt zaten var: {item['id'], item['ad']}")
 

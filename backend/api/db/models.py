@@ -44,7 +44,7 @@ class SubscriptionTypes(Base):
 class Directory(Base):
     __tablename__ = "directory"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(Integer, primary_key=True)
     hiyerId = Column(Text, nullable=True)
     ataId = Column(Integer, ForeignKey("directory.id"), nullable=True)
     adi = Column(Text, nullable=False)

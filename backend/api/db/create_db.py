@@ -53,7 +53,7 @@ def create_tables():
     # Dizin tablosu oluştur
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS directory (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id INTEGER PRIMARY KEY,
             hiyerId TEXT,
             ataId INTEGER,
             adi TEXT,

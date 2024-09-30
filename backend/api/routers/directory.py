@@ -21,13 +21,18 @@ router = APIRouter()
 def build_tree(
         directories: List[Directory],
 ):
-    try:
-        root_nodes = [directory for directory in directories if directory.ataId is None]
-        print(f"RootNode: {str(root_nodes[0].id) ,root_nodes[0].adi,str(root_nodes[0].ataId)}")
+    root_nodes = []
 
-    except Exception as e:
-        print(f"RootNode alınırken bir hata oluştu: {str(e)}")
-        raise HTTPException(status_code=500, detail="Veritabanından veri alınırken bir hata oluştu.")
+    for directory in directories:
+        print(f"Directory: {str(directory.id) ,directory.adi,str(directory.ataId)}")
+        if directory.ataId is None or directory.ataId is '':
+            root_nodes.append(directory) 
+            print(f"RootNode: {str(directory.id)}, {directory.adi}, {str(directory.ataId)}")
+        else:
+            continue
+
+    if not root_nodes:
+        print("Root Node Bulunamadı")
     
     tree = build_subtree(root_nodes, directories)
     return tree
