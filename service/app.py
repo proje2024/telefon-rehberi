@@ -10,6 +10,7 @@ load_dotenv()
 # Servis URL'si
 SERVICE_URL = os.getenv("SERVICE_URL")
 
+
 # Veritabanı URL'si
 DATABASE_PATH = os.getenv('DATABASE_PATH')  # Backend ile aynı yol
 DATABASE_URL = f"sqlite:///{DATABASE_PATH}"
