@@ -54,7 +54,7 @@ def create_tables():
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS directory (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            hiyerid TEXT,
+            hiyerId TEXT,
             ataId INTEGER,
             adi TEXT,
             hiyerAd TEXT,

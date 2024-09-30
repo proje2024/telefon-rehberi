@@ -23,10 +23,12 @@ def build_tree(
 ):
     try:
         root_nodes = [directory for directory in directories if directory.ataId is None]
+        print(f"RootNode: {str(root_nodes[0].id) ,root_nodes[0].adi,str(root_nodes[0].ataId)}")
+
     except Exception as e:
         print(f"RootNode alınırken bir hata oluştu: {str(e)}")
         raise HTTPException(status_code=500, detail="Veritabanından veri alınırken bir hata oluştu.")
-    print(f"RootNode: {str(root_nodes[0].id) ,root_nodes[0].adi,str(root_nodes[0].ataId)}")
+    
     tree = build_subtree(root_nodes, directories)
     return tree
 

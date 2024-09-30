@@ -27,6 +27,8 @@ spec:
               value: "${BACKUP_PATH}"
             - name: SERVICE_URL
               value: "${SERVICE_URL}"
+            - name: SLEEP_INTERVAL
+              value: "${SLEEP_INTERVAL}"
           volumeMounts:
             - name: rehber-data
               mountPath: /app/data

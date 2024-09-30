@@ -45,7 +45,7 @@ class Directory(Base):
     __tablename__ = "directory"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    hiyerid = Column(Text, nullable=True)
+    hiyerId = Column(Text, nullable=True)
     ataId = Column(Integer, ForeignKey("directory.id"), nullable=True)
     adi = Column(Text, nullable=False)
     hiyerAd = Column(Text, nullable=False)
