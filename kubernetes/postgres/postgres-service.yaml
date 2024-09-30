@@ -5,9 +5,8 @@ metadata:
 spec:
   selector:
     app: ${APP_NAME}
-  type: NodePort
   ports:
     - protocol: TCP
-      port: ${API_PORT}
+      port: ${DB_PORT}
       targetPort: ${DOCKER_INTERNAL_PORT}
-      nodePort: ${API_NODE_PORT}
+  type: ClusterIP

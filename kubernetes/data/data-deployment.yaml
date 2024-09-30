@@ -21,18 +21,8 @@ spec:
               value: "${DEFAULT_ADMIN}"
             - name: DEFAULT_PASSWORD
               value: "${DEFAULT_PASSWORD}"
-            - name: DATABASE_PATH
-              value: "${DATABASE_PATH}"
-            - name: BACKUP_PATH
-              value: "${BACKUP_PATH}"
             - name: SERVICE_URL
               value: "${SERVICE_URL}"
             - name: SLEEP_INTERVAL
               value: "${SLEEP_INTERVAL}"
-          volumeMounts:
-            - name: rehber-data
-              mountPath: /app/data
-      volumes:
-        - name: rehber-data
-          persistentVolumeClaim:
-            claimName: ${PVC_NAME}
+

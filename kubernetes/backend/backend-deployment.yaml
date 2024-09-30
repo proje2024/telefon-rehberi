@@ -28,16 +28,15 @@ spec:
               value: "${DEFAULT_ADMIN}"
             - name: DEFAULT_PASSWORD
               value: "${DEFAULT_PASSWORD}"
-            - name: DATABASE_NAME
-              value: "${DATABASE_NAME}"
-            - name: DATABASE_PATH
-              value: "${DATABASE_PATH}"
-            - name: BACKUP_PATH
-              value: "${BACKUP_PATH}"
-          volumeMounts:
-            - name: rehber-data
-              mountPath: /app/data
-      volumes:
-        - name: rehber-data
-          persistentVolumeClaim:
-            claimName: ${PVC_NAME}
+            - name: POSTGRES_USER
+              value: "admin"  # PostgreSQL kullanıcı adı
+            - name: POSTGRES_PASSWORD
+              value: "sstek2024"  # PostgreSQL şifresi
+            - name: POSTGRES_DB
+              value: "rehber_db"  # PostgreSQL veritabanı adı
+            - name: DB_HOST
+              value: "postgres-service"  # PostgreSQL servisi adı
+            - name: DB_PORT
+              value: "5432"  # PostgreSQL varsayılan portu
+            - name: TZ
+              value: "UTC"  # Zaman dilimi

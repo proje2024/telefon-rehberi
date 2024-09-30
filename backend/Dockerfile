@@ -1,3 +1,4 @@
+# Base image olarak python:3.9-slim kullan
 FROM python:3.9-slim
 
 # Çalışma dizinini ayarla
@@ -12,19 +13,14 @@ COPY backend/requirements.txt .
 # Gereksinimleri yükle
 RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
-# Veritabanı dosyasını oluşturmak için bir Python betiği ekleyin
-COPY backend/api/db/create_db.py /create_db.py
-
-# Veritabanı ve tablo oluşturma işlemini yapın
-RUN python /create_db.py
+# Uygulama dosyalarını ve scriptleri kopyala
+COPY backend /app
 
 # Yedekleme dizinini oluştur
 RUN mkdir -p /app/backups
 
-# Yedekleme scriptini kopyala
-COPY backend/api/db/backup_db.py /app/backup_db.py
+# Veritabanı ve tablo oluşturma işlemi için CMD veya ENTRYPOINT kullan
+# Uygulama başlatma komutunu revize edelim
 
-# Uygulama dosyalarını kopyala
-COPY backend /app
-# Ortam değişkenini kullanarak yedekleme betiğini ve uygulamayı başlat
-CMD ["sh", "-c", "python /app/backup_db.py & uvicorn api.main:apöp --host 0.0.0.0 --port ${API_PORT}"]
+# Entry-point betiği ile tablo oluşturma ve uygulamayı başlatma
+ENTRYPOINT ["sh", "-c", "python /app/create_db.py && python /app/backup_db.py & uvicorn api.main:app --host 0.0.0.0 --port ${API_PORT}"]
