@@ -228,7 +228,7 @@ async def get_node(
         # Fetch and add child nodes
         
 
-        sub_query = db.query(Directory).filter(Directory.ataId == directory.id)
+        sub_query = db.query(Directory).filter(Directory.ataId == directory.id, Directory.id != 1)
 
         # Eğer user.role == 2 ise, sadece visibility == 1 olanları sorgula
         if user.role == 2:
