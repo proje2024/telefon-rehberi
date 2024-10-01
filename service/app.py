@@ -41,7 +41,7 @@ def insert_data_into_db(engine, data):
                         connection.execute(insert_directory, values_directory)
                         print(f"Yeni Bir kayıt Eklendi : {item['id'], item['ad'], item['ataId']}")
                     else:
-                        print(f"Bu kayıt zaten var: {item['id'], item['ad']}")
+                        print(f"Bu kayıt zaten var: {item['id'], item['ad'], item['ataId']}")
 
             except Exception as e:
                 print(f"Bir hata oluştu: {e}")

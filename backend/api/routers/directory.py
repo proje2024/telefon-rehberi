@@ -24,16 +24,19 @@ def build_tree(
     root_nodes = []
 
     for directory in directories:
-        print(f"Directory: {str(directory.id) ,directory.adi,str(directory.ataId)}")
-        if directory.ataId is None or directory.ataId is '':
+        # Hem directory.id == 1 hem de directory.ataId == '' olan root node'ları ekle
+        if directory.id == 1 or directory.ataId == None or directory.ataId == '':
             root_nodes.append(directory) 
             print(f"RootNode: {str(directory.id)}, {directory.adi}, {str(directory.ataId)}")
+            continue
         else:
+            print(f"Directory: {str(directory.id), directory.adi, str(directory.ataId)}")
             continue
 
     if not root_nodes:
         print("Root Node Bulunamadı")
     
+    # Tek bir ağaç yapısı oluşturuyoruz
     tree = build_subtree(root_nodes, directories)
     return tree
 
@@ -44,8 +47,9 @@ def build_subtree(
     subtree = []
 
     for parent in parent_nodes:
-        print(f"Parent Node: {str(parent.id),parent.adi,str(parent.ataId)}")
-        child_nodes = [node for node in all_nodes if node.ataId == parent.id]
+        print(f"Parent Node: {str(parent.id), parent.adi, str(parent.ataId)}")
+        # Child node'ları bul ve ekle
+        child_nodes = [node for node in all_nodes if node.ataId == parent.id and node.id != 1]
         
         if not child_nodes:
             print(f"No child nodes found for parent node with id: {parent.id}")
@@ -70,6 +74,7 @@ async def get_tree(
         print(f"Veritabanından veri alınırken bir hata oluştu: {str(e)}")
         raise HTTPException(status_code=500, detail="Veritabanından veri alınırken bir hata oluştu.")
 
+    # Tek bir liste içinde ağaç yapısı döndürülüyor
     result = build_tree(directories)
     return result
 
