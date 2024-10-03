@@ -36,10 +36,11 @@ class User(Base):
     role_rel = relationship("Role", back_populates="users")
 
 class SubscriptionTypes(Base):
-    __tablename__ = "subscriptionTypes"
+    __tablename__ = "subscriptiontypes"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    subscription_types =  Column(Text, nullable=False)
+    subscription_types = Column(Text, nullable=False)
+
 
 class Directory(Base):
     __tablename__ = "directory"
@@ -51,19 +52,18 @@ class Directory(Base):
     hiyerAd = Column(Text, nullable=False)
     internal_number_area_code = Column(Text, nullable=True)
     internal_number = Column(Text, nullable=True)
-    internal_number_subscription_id = Column(Integer, ForeignKey("subscriptionTypes.id"), nullable=False, default=1)
+    internal_number_subscription_id = Column(Integer, ForeignKey("subscriptiontypes.id"), nullable=False, default=1)
     ip_number_area_code = Column(Text, nullable=True)
     ip_number = Column(Text, nullable=True)
-    ip_number_subscription_id = Column(Integer, ForeignKey("subscriptionTypes.id"), nullable=False, default=1)
+    ip_number_subscription_id = Column(Integer, ForeignKey("subscriptiontypes.id"), nullable=False, default=1)
     mailbox = Column(Text, nullable=True)
     visibility = Column(Integer, nullable=True, default=1)
     visibilityForSubDirectory = Column(Integer, nullable=True, default=1)
 
     # Define explicit relationships
-    internal_subscription_type = relationship("SubscriptionTypes",foreign_keys=[internal_number_subscription_id],    uselist=False)
-    ip_subscription_type = relationship("SubscriptionTypes",foreign_keys=[ip_number_subscription_id],    uselist=False)
-    parent = relationship("Directory", remote_side=[id])
-
+    internal_subscription_type = relationship("SubscriptionTypes", foreign_keys=[internal_number_subscription_id], uselist=False)
+    ip_subscription_type = relationship("SubscriptionTypes", foreign_keys=[ip_number_subscription_id], uselist=False)
+    parent = relationship("Directory", remote_side=[id], backref='children')
 
 class Sub_Directory(Base):
     __tablename__ = "sub_directory"
@@ -73,13 +73,15 @@ class Sub_Directory(Base):
     adi = Column(Text, nullable=False)
     internal_number_area_code = Column(Text, nullable=True)
     internal_number = Column(Text, nullable=True)
-    internal_number_subscription_id = Column(Integer, ForeignKey("subscriptionTypes.id"), nullable=False, default=1)
+    internal_number_subscription_id = Column(Integer, ForeignKey("subscriptiontypes.id"), nullable=False, default=1)
     ip_number_area_code = Column(Text, nullable=True)
     ip_number = Column(Text, nullable=True)
-    ip_number_subscription_id = Column(Integer, ForeignKey("subscriptionTypes.id"), nullable=False, default=1)
+    ip_number_subscription_id = Column(Integer, ForeignKey("subscriptiontypes.id"), nullable=False, default=1)
     mailbox = Column(Text, nullable=True)
 
     parent = relationship("Directory", remote_side=[Directory.id])
+    internal_subscription_type = relationship("SubscriptionTypes", foreign_keys=[internal_number_subscription_id], uselist=False)
+    ip_subscription_type = relationship("SubscriptionTypes", foreign_keys=[ip_number_subscription_id], uselist=False)
 
 class DynamicColumn(Base):
     __tablename__ = "dynamic_attributes"

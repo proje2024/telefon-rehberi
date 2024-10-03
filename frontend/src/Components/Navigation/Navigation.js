@@ -169,7 +169,6 @@ const Navigation = () => {
   // Backup and Restore Handlers
   const handleBackup = async () => {
     try {
-      // Eğer token varsa, Axios istek başlığına ekle
       const response = await Axios.post('/api/directory/backupDatabase', {}, {
         responseType: 'blob',
         headers: {
@@ -182,7 +181,7 @@ const Navigation = () => {
         const url = window.URL.createObjectURL(blob);
         const now = new Date();
         const formattedDate = now.toISOString().replace(/T/, '_').replace(/:/g, '-').slice(0, 19);
-        const filename = `database_backup_${formattedDate}.db`;
+        const filename = `database_backup_${formattedDate}.sql`; // Dosya uzantısını güncelledim
 
         const a = document.createElement('a');
         a.href = url;
@@ -229,11 +228,11 @@ const Navigation = () => {
         message.success('Veritabanı başarıyla geri yüklendi.');
       } else {
         setRestoreMessage('Geri yükleme sırasında bir hata oluştu.');
-        message.success('Geri yükleme sırasında bir hata oluştu.');
+        message.error('Geri yükleme sırasında bir hata oluştu.');
       }
     } catch (error) {
       setRestoreMessage('Geri yükleme sırasında bir hata oluştu.');
-      message.success('Geri yükleme sırasında bir hata oluştu.');
+      message.error('Geri yükleme sırasında bir hata oluştu.');
     } finally {
       setLoadingRestore(false);
       handleRestoreDialogClose();

@@ -22,16 +22,18 @@ spec:
               value: "${POSTGRES_PASSWORD}"
             - name: POSTGRES_DB
               value: "${POSTGRES_DB}"
-            - name: TZ
-              value: "${TZ}"
-            - name: DB_PORT
-              value: "${DB_PORT}"
           ports:
             - containerPort: ${DOCKER_INTERNAL_PORT}
           volumeMounts:
-            - mountPath: /var/lib/postgresql/data
-              name: postgres-storage
+            - name: init-script
+              mountPath: /docker-entrypoint-initdb.d
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
+            
       volumes:
+        - name: init-script
+          configMap:
+            name: postgres-init-scripts
         - name: postgres-storage
           persistentVolumeClaim:
-            claimName: ${PVC_NAME}
+            claimName: ${PVC_NAME}  # PVC'nin adını buraya yerleştirin

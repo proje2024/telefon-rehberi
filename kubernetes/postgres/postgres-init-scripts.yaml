@@ -1,0 +1,85 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init-scripts
+data:
+  init.sql: |
+    CREATE TABLE IF NOT EXISTS roles (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(255) NOT NULL UNIQUE,
+      description TEXT
+    );
+
+    INSERT INTO roles (name, description) VALUES
+    ('admin', 'Admin has the capability to do everything'),
+    ('users', 'Default users can view directory')
+    ON CONFLICT (name) DO NOTHING;
+
+    CREATE TABLE IF NOT EXISTS subscriptiontypes (
+      id SERIAL PRIMARY KEY,
+      subscription_types VARCHAR(255)
+    );
+
+    INSERT INTO subscriptiontypes (subscription_types) VALUES
+    ('substype1'),('substype2'),('substype3');
+
+    CREATE TABLE IF NOT EXISTS users (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(255) NOT NULL,
+      surname VARCHAR(255) NOT NULL,
+      phone_number TEXT,
+      username VARCHAR(255) UNIQUE,
+      password VARCHAR(255) NOT NULL,
+      email VARCHAR(255) UNIQUE NOT NULL,
+      role INTEGER DEFAULT 2,
+      FOREIGN KEY (role) REFERENCES roles(id)
+    );
+
+    CREATE TABLE IF NOT EXISTS directory (
+      "id" SERIAL PRIMARY KEY,
+      "hiyerId" TEXT,
+      "ataId" INTEGER,
+      "adi" TEXT,
+      "hiyerAd" TEXT,
+      "internal_number_area_code" VARCHAR(50),
+      "internal_number" VARCHAR(50),
+      "internal_number_subscription_id" INTEGER DEFAULT 1,
+      "ip_number_area_code" VARCHAR(50),
+      "ip_number" VARCHAR(50),
+      "ip_number_subscription_id" INTEGER DEFAULT 1,
+      "mailbox" TEXT,
+      "visibility" INTEGER DEFAULT 1,
+      "visibilityForSubDirectory" INTEGER DEFAULT 1,
+      FOREIGN KEY ("internal_number_subscription_id") REFERENCES subscriptiontypes(id),
+      FOREIGN KEY ("ip_number_subscription_id") REFERENCES subscriptiontypes(id),
+      FOREIGN KEY ("ataId") REFERENCES directory(id)
+    );
+
+    CREATE TABLE IF NOT EXISTS sub_directory (
+      id SERIAL PRIMARY KEY,
+      directoryid INTEGER,
+      adi TEXT,
+      internal_number_area_code VARCHAR(50),
+      internal_number VARCHAR(50),
+      internal_number_subscription_id INTEGER DEFAULT 1,
+      ip_number_area_code VARCHAR(50),
+      ip_number VARCHAR(50),
+      ip_number_subscription_id INTEGER DEFAULT 1,
+      mailbox TEXT,
+      FOREIGN KEY (directoryid) REFERENCES directory(id)
+    );
+
+    CREATE TABLE IF NOT EXISTS dynamic_attributes (
+      id SERIAL PRIMARY KEY,  
+      attribute_name TEXT             
+    );
+
+    CREATE TABLE IF NOT EXISTS dynamic_data (
+      id SERIAL PRIMARY KEY,  
+      attributeid INTEGER,
+      tableid INTEGER,                  
+      recordid INTEGER,   
+      value TEXT,                      
+      CHECK (tableid IN (1, 2)),
+      FOREIGN KEY (attributeid) REFERENCES dynamic_attributes(id)
+    );

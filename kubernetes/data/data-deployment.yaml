@@ -25,4 +25,16 @@ spec:
               value: "${SERVICE_URL}"
             - name: SLEEP_INTERVAL
               value: "${SLEEP_INTERVAL}"
+            - name: POSTGRES_USER
+              value: "${POSTGRES_USER}"
+            - name: POSTGRES_PASSWORD
+              value: "${POSTGRES_PASSWORD}"
+            - name: POSTGRES_DB
+              value: "${POSTGRES_DB}"
+            - name: POSTGRES_SERVICE_NAME
+              value: "${POSTGRES_SERVICE_NAME}"
+            - name: DB_PORT
+              value: "${DB_PORT}"
+            - name: TZ
+              value: "${TZ}"
 

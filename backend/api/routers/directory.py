@@ -1,4 +1,3 @@
-from sqlalchemy import Column, null, or_, and_
 from fastapi import FastAPI, status, HTTPException, Depends, APIRouter, File, UploadFile
 from sqlalchemy.orm import Session, joinedload
 from api.deps import get_db, get_current_user
@@ -6,29 +5,44 @@ from api.db.models import Directory, SubscriptionTypes, Sub_Directory, DynamicCo
 from api.schemas import DirectoryEditV, SubscriptionEditV, SubscriptionCreateV, SubDirectoryCreateV, SubDirectoryEditV, DynamicColumnCreateV, DynamicColumnEditV
 from typing import List, Dict, Any
 import os
-import shutil
+import subprocess
 from fastapi.responses import FileResponse
 from datetime import datetime
 from dotenv import load_dotenv
+from tempfile import NamedTemporaryFile
+from fastapi import BackgroundTasks
 
 load_dotenv()
 
-DATABASE_PATH = os.getenv('DATABASE_PATH')
 BACKUP_PATH = os.getenv('BACKUP_PATH')
+DATABASE_NAME = os.getenv('POSTGRES_DB')
+DATABASE_USER = os.getenv('POSTGRES_USER')
+DATABASE_PASSWORD = os.getenv('POSTGRES_PASSWORD')
+DATABASE_HOST = os.getenv('POSTGRES_SERVICE_NAME')
+DATABASE_PORT = os.getenv('DB_PORT', '5432')
+DATABASE_URL = f"postgresql://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOST}:{DATABASE_PORT}/{DATABASE_NAME}"
 
 router = APIRouter()
 
 def build_tree(
         directories: List[Directory],
 ):
-    try:
-        root_nodes = [directory for directory in directories if directory.ataId is None]
-        print(f"RootNode: {str(root_nodes[0].id) ,root_nodes[0].adi,str(root_nodes[0].ataId)}")
+    root_nodes = []
 
-    except Exception as e:
-        print(f"RootNode alınırken bir hata oluştu: {str(e)}")
-        raise HTTPException(status_code=500, detail="Veritabanından veri alınırken bir hata oluştu.")
+    for directory in directories:
+        # Hem directory.id == 1 hem de directory.ataId == '' olan root node'ları ekle
+        if directory.id == 1 or directory.ataId == None or directory.ataId == '':
+            root_nodes.append(directory) 
+            print(f"RootNode: {str(directory.id)}, {directory.adi}, {str(directory.ataId)}")
+            continue
+        else:
+            print(f"Directory: {str(directory.id), directory.adi, str(directory.ataId)}")
+            continue
+
+    if not root_nodes:
+        print("Root Node Bulunamadı")
     
+    # Tek bir ağaç yapısı oluşturuyoruz
     tree = build_subtree(root_nodes, directories)
     return tree
 
@@ -39,8 +53,9 @@ def build_subtree(
     subtree = []
 
     for parent in parent_nodes:
-        print(f"Parent Node: {str(parent.id),parent.adi,str(parent.ataId)}")
-        child_nodes = [node for node in all_nodes if node.ataId == parent.id]
+        print(f"Parent Node: {str(parent.id), parent.adi, str(parent.ataId)}")
+        # Child node'ları bul ve ekle
+        child_nodes = [node for node in all_nodes if node.ataId == parent.id and node.id != 1]
         
         if not child_nodes:
             print(f"No child nodes found for parent node with id: {parent.id}")
@@ -65,6 +80,7 @@ async def get_tree(
         print(f"Veritabanından veri alınırken bir hata oluştu: {str(e)}")
         raise HTTPException(status_code=500, detail="Veritabanından veri alınırken bir hata oluştu.")
 
+    # Tek bir liste içinde ağaç yapısı döndürülüyor
     result = build_tree(directories)
     return result
 
@@ -218,7 +234,7 @@ async def get_node(
         # Fetch and add child nodes
         
 
-        sub_query = db.query(Directory).filter(Directory.ataId == directory.id)
+        sub_query = db.query(Directory).filter(Directory.ataId == directory.id, Directory.id != 1)
 
         # Eğer user.role == 2 ise, sadece visibility == 1 olanları sorgula
         if user.role == 2:
@@ -319,49 +335,136 @@ async def delete_subscription(
 @router.post("/backupDatabase", summary="Backup Database and Download")
 async def backup_database_and_download(
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_user)  # Ensure the user is authenticated
+    user: User = Depends(get_current_user)  # Kullanıcı doğrulaması
 ):
     try:
-        # Yedekleme dizinini oluştur
         os.makedirs(BACKUP_PATH, exist_ok=True)
         
-        # Yedekleme dosyasının adını oluştur
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        backup_filename = f'database_backup_{timestamp}.db'
+        backup_filename = f'all_data_backup_{timestamp}.sql'
         backup_path = os.path.join(BACKUP_PATH, backup_filename)
 
-        # Veritabanını yedekle
-        shutil.copy2(DATABASE_PATH, backup_path)
+        dump_command = [
+            'pg_dump',
+            '-U', DATABASE_USER,
+            '-h', DATABASE_HOST,
+            '-p', DATABASE_PORT,
+            '--data-only',  # Sadece verileri yedekle
+            DATABASE_NAME,
+            '-f', backup_path
+        ]
 
-        # Yedekleme dosyasını döndür
+        os.environ['PGPASSWORD'] = DATABASE_PASSWORD
+
+        result = subprocess.run(dump_command, check=True, capture_output=True)
+
         return FileResponse(backup_path, filename=backup_filename, headers={"Content-Disposition": f"attachment; filename={backup_filename}"})
-    
+
+    except subprocess.CalledProcessError as e:
+        raise HTTPException(status_code=500, detail=f"Backup failed: {e.stderr.decode().strip()}")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Backup failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}") 
+
+# Tabloları truncate eden bir fonksiyon
+async def truncate_all_tables():
+    # PostgreSQL veritabanı bilgilerini al
+    DB_USER = os.getenv('POSTGRES_USER')
+    DB_PASSWORD = os.getenv('POSTGRES_PASSWORD')
+    DB_NAME = os.getenv('POSTGRES_DB')
+    DB_HOST = os.getenv('POSTGRES_SERVICE_NAME')
+    DB_PORT = os.getenv('DB_PORT', '5432')
+
+    # Tabloları almak için psql komutunu oluştur
+    get_tables_command = f"psql -U {DB_USER} -h {DB_HOST} -p {DB_PORT} -d {DB_NAME} -t -c \"SELECT tablename FROM pg_tables WHERE schemaname = 'public';\""
     
+    # PGPASSWORD ortam değişkenini ayarla
+    env = os.environ.copy()
+    env['PGPASSWORD'] = DB_PASSWORD
+
+    # Tabloları al
+    result = subprocess.run(get_tables_command, shell=True, capture_output=True, text=True, env=env)
+
+    if result.returncode != 0:
+        print(f"Error retrieving tables: {result.stderr.strip()}")
+        return
+
+    # Tabloları listele
+    tables = result.stdout.strip().split('\n')
+
+    # Tabloları TRUNCATE etme komutunu oluştur
+    if tables:
+        truncate_command = "TRUNCATE TABLE " + ", ".join(tables) + " RESTART IDENTITY CASCADE;"
+        truncate_command_full = f"psql -U {DB_USER} -h {DB_HOST} -p {DB_PORT} -d {DB_NAME} -c \"{truncate_command}\""
+
+        # TRUNCATE komutunu çalıştır
+        result = subprocess.run(truncate_command_full, shell=True, capture_output=True, text=True, env=env)
+
+        if result.returncode != 0:
+            print(f"Error truncating tables: {result.stderr.strip()}")
+        else:
+            print("All tables truncated successfully.")
+    else:
+        print("No tables found to truncate.")
+
+async def restore_database_background(temp_file_path: str):
+    try:
+        # Tüm tabloları truncate et
+        await truncate_all_tables()
+
+        # PostgreSQL veritabanı bilgilerini al
+        DB_USER = os.getenv('POSTGRES_USER')
+        DB_PASSWORD = os.getenv('POSTGRES_PASSWORD')
+        DB_NAME = os.getenv('POSTGRES_DB')
+        DB_HOST = os.getenv('POSTGRES_SERVICE_NAME')
+        DB_PORT = os.getenv('DB_PORT', '5432')
+
+        # Restore komutunu tanımla
+        restore_command = f"psql -U {DB_USER} -h {DB_HOST} -p {DB_PORT} -d {DB_NAME} -f {temp_file_path}"
+
+        # PGPASSWORD ortam değişkenini ayarla
+        env = os.environ.copy()
+        env['PGPASSWORD'] = DB_PASSWORD
+
+        # PostgreSQL veritabanına geri yükleme komutunu çalıştır
+        result = subprocess.run(restore_command, shell=True, check=True, capture_output=True, text=True, env=env)
+
+        if result.returncode != 0:
+            print(f"Restore failed: {result.stderr.strip()}")
+            return
+
+        # Geri yükleme başarılı olduysa geçici dosyayı sil
+        os.remove(temp_file_path)
+        print("Database restored successfully.")
+
+    except subprocess.CalledProcessError as e:
+        print(f"Restore failed: {e.stderr.decode().strip()}")
+        if os.path.exists(temp_file_path):
+            os.remove(temp_file_path)  # Hata durumunda dosyayı sil
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
+        if os.path.exists(temp_file_path):
+            os.remove(temp_file_path)  # Hata durumunda dosyayı sil
+
 @router.post("/restoreDatabase", summary="Restore Database from Backup")
 async def restore_database(
-    file: UploadFile = File(...),
-    user: User = Depends(get_current_user)  # Ensure the user is authenticated
+    background_tasks: BackgroundTasks,  # İlk argüman arka plan görevleri
+    file: UploadFile = File(...),  # İkinci argüman varsayılan değeri olan argüman
+    db: Session = Depends(get_db),  # Üçüncü argüman varsayılan değeri olan argüman
+    user: User = Depends(get_current_user)  # Dördüncü argüman varsayılan değeri olan argüman
 ):
     try:
-        # Geçici dosya yolu oluştur
-        temp_file_path = os.path.join(BACKUP_PATH, file.filename)
+        # Geçici bir dosya oluşturup yüklenen backup dosyasını buraya kaydedelim
+        with NamedTemporaryFile(delete=False, suffix=".sql") as temp_file:
+            temp_file.write(await file.read())
+            temp_file_path = temp_file.name
 
-        # Yüklenen dosyayı geçici dosya olarak kaydet
-        with open(temp_file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
+        # Arka planda geri yükleme işlemini başlat
+        background_tasks.add_task(restore_database_background, temp_file_path)
 
-        # Veritabanını geri yükle
-        shutil.copy2(temp_file_path, DATABASE_PATH)
-
-        # Geçici dosyayı sil
-        os.remove(temp_file_path)
-
-        return {"status": "success", "message": "Database restored successfully"}
+        return {"message": "Restore process started, it will complete in the background."}
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Restore failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
 @router.post('/addSubDirectory', summary="Add SubDirectory")
 def add_sub_directory(

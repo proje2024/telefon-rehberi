@@ -16,9 +16,6 @@ spec:
         - name: ${CONTAINER_NAME}
           image: ${IMAGE_NAME}:${IMAGE_VERSION}
           imagePullPolicy: IfNotPresent
-          command: ["/bin/sh", "-c"]
-          args:
-            - "python /app/backup_db.py & uvicorn api.main:app --host 0.0.0.0 --port ${API_PORT}"
           env:
             - name: API_PORT
               value: "${API_PORT}"
@@ -29,14 +26,16 @@ spec:
             - name: DEFAULT_PASSWORD
               value: "${DEFAULT_PASSWORD}"
             - name: POSTGRES_USER
-              value: "admin"  # PostgreSQL kullanıcı adı
+              value: "${POSTGRES_USER}"
             - name: POSTGRES_PASSWORD
-              value: "sstek2024"  # PostgreSQL şifresi
+              value: "${POSTGRES_PASSWORD}"
             - name: POSTGRES_DB
-              value: "rehber_db"  # PostgreSQL veritabanı adı
-            - name: DB_HOST
-              value: "postgres-service"  # PostgreSQL servisi adı
+              value: "${POSTGRES_DB}"
+            - name: POSTGRES_SERVICE_NAME
+              value: "${POSTGRES_SERVICE_NAME}"
             - name: DB_PORT
-              value: "5432"  # PostgreSQL varsayılan portu
+              value: "${DB_PORT}"
             - name: TZ
-              value: "UTC"  # Zaman dilimi
+              value: "${TZ}"
+            - name: BACKUP_PATH
+              value: "${BACKUP_PATH}"

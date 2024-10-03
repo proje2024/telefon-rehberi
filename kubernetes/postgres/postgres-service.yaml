@@ -7,6 +7,6 @@ spec:
     app: ${APP_NAME}
   ports:
     - protocol: TCP
-      port: ${DB_PORT}
+      port: ${DOCKER_INTERNAL_PORT}
       targetPort: ${DOCKER_INTERNAL_PORT}
   type: ClusterIP

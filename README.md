@@ -156,26 +156,19 @@ Oluşturduğunuz docker image'leri minikube içindeki docker ortamına yükleyin
    Lütfren aşağıdaki sırada oluşturunuz.
 
    - **PostgreSQL Servisini Çalıştırmak için:**
-
-    Öncelikle Persistent Volume Claim (PVC) oluşturun:
   
     ```bash
     export $(cat kubernetes/postgres/.env | xargs)  # Ortam değişkenlerini yükleyin
     envsubst < kubernetes/postgres/postgres-pvc.yaml | kubectl apply -f -
-    ```
-  
-    Daha sonra PostgreSQL servisini çalıştırın:
-  
-    ```bash
     envsubst < kubernetes/postgres/postgres-deployment.yaml | kubectl apply -f -
     envsubst < kubernetes/postgres/postgres-service.yaml | kubectl apply -f -
+    envsubst < kubernetes/postgres/postgres-init-scripts.yaml | kubectl apply -f -
     ```
 
    - **Backend Servisini Çalıştırmak için:**
 
      ```bash
     export $(cat kubernetes/backend/.env | xargs) # Ortam değişkenlerini yükleyin
-    envsubst < kubernetes/backend/backend-pvc.yaml | kubectl apply -f -
     envsubst < kubernetes/backend/backend-deployment.yaml | kubectl apply -f -
     envsubst < kubernetes/backend/backend-service.yaml | kubectl apply -f -
      ```
@@ -221,7 +214,3 @@ Oluşturduğunuz docker image'leri minikube içindeki docker ortamına yükleyin
    ```bash
    kubectl logs <pod-name>
    ```
-
-   kubectl delete deployment --all
-   kubectl delete service --all
-   kubectl delete pvc --all

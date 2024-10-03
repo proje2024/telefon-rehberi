@@ -1,26 +1,43 @@
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, Session
 from api.utils import get_password_hash
 from .base import Base
-from .models import User, SubscriptionTypes
+from .models import User
 import os
 from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
 
-# Get database connection details from environment variables
+# Veritabanı bağlantı detayları
 DB_USER = os.getenv('POSTGRES_USER')
 DB_PASSWORD = os.getenv('POSTGRES_PASSWORD')
 DB_NAME = os.getenv('POSTGRES_DB')
-DB_HOST = os.getenv('HOST', 'localhost')  # Assuming local if not set
-DB_PORT = os.getenv('DB_PORT', '5433')  # Use the port defined in your .env
+DB_HOST = os.getenv('POSTGRES_SERVICE_NAME')  # Servis adı
+DB_PORT = os.getenv('DB_PORT', '5432')  # 5432 varsayılan port
 
-# Construct the database URL for PostgreSQL
+# PostgreSQL bağlantı URL'si
 DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
-# Create the SQLAlchemy engine
-engine = create_engine(DATABASE_URL)
+# Bağlantı kontrolü için bir fonksiyon
+def create_db_engine():
+    try:
+        print(DATABASE_URL)
+        engine = create_engine(DATABASE_URL)
+        # Bağlantıyı test et
+        with engine.connect() as connection:
+            result = connection.execute(text("SELECT 1"))  # Basit bir sorgu
+            for row in result:
+                print(row)  # Sonucu yazdır
+        print("Veritabanı bağlantısı başarılı!")
+        return engine
+    except Exception as e:
+        print(f"Veritabanı bağlantısı başarısız: {e}")
+        return None
+
+# Bağlantıyı oluştur
+engine = create_db_engine()
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def init_db():
@@ -41,15 +58,6 @@ def init_db():
             role=1,
         )
 
-        # Define subscriptions
-        subscription1 = SubscriptionTypes(subscription_types="substype1")
-        subscription2 = SubscriptionTypes(subscription_types="substype2")
-        subscription3 = SubscriptionTypes(subscription_types="substype3")
-
-        # Add subscriptions and admin user to the session
-        db.add(subscription1)
-        db.add(subscription2)
-        db.add(subscription3)
         db.add(admin_user)
         db.flush()
 
