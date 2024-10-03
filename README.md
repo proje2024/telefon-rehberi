@@ -156,31 +156,27 @@ Oluşturduğunuz docker image'leri minikube içindeki docker ortamına yükleyin
    Lütfren aşağıdaki sırada oluşturunuz.
 
    - **PostgreSQL Servisini Çalıştırmak için:**
-  
     ```bash
-    export $(cat kubernetes/postgres/.env | xargs)  # Ortam değişkenlerini yükleyin
-    envsubst < kubernetes/postgres/postgres-pvc.yaml | kubectl apply -f -
-    envsubst < kubernetes/postgres/postgres-deployment.yaml | kubectl apply -f -
-    envsubst < kubernetes/postgres/postgres-service.yaml | kubectl apply -f -
-    envsubst < kubernetes/postgres/postgres-init-scripts.yaml | kubectl apply -f -
+        export $(cat kubernetes/postgres/.env | xargs)  # Ortam değişkenlerini yükleyin
+        envsubst < kubernetes/postgres/postgres-pvc.yaml | kubectl apply -f -
+        envsubst < kubernetes/postgres/postgres-deployment.yaml | kubectl apply -f -
+        envsubst < kubernetes/postgres/postgres-service.yaml | kubectl apply -f -
+        envsubst < kubernetes/postgres/postgres-init-scripts.yaml | kubectl apply -f -
     ```
 
    - **Backend Servisini Çalıştırmak için:**
-
      ```bash
-    export $(cat kubernetes/backend/.env | xargs) # Ortam değişkenlerini yükleyin
-    envsubst < kubernetes/backend/backend-deployment.yaml | kubectl apply -f -
-    envsubst < kubernetes/backend/backend-service.yaml | kubectl apply -f -
+        export $(cat kubernetes/backend/.env | xargs) # Ortam değişkenlerini yükleyin
+        envsubst < kubernetes/backend/backend-deployment.yaml | kubectl apply -f -
+        envsubst < kubernetes/backend/backend-service.yaml | kubectl apply -f -
      ```
 
    - **Frontend Servisini Çalıştırmak için:**
-
      ```bash
       export $(cat kubernetes/frontend/.env | xargs) # Ortam değişkenlerini yükleyin
       envsubst < kubernetes/frontend/frontend-deployment.yaml | kubectl apply -f -
       envsubst < kubernetes/frontend/frontend-service.yaml | kubectl apply -f -
      ```
-     
    - **Data Servisini Çalıştırmak için:**
 
      ```bash
