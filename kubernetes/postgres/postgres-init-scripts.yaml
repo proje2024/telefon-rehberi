@@ -76,10 +76,9 @@ data:
 
     CREATE TABLE IF NOT EXISTS dynamic_data (
       id SERIAL PRIMARY KEY,  
-      attributeid INTEGER,
+      attributeid INTEGER REFERENCES dynamic_attributes(id) ON DELETE CASCADE,
       tableid INTEGER,                  
       recordid INTEGER,   
       value TEXT,                      
       CHECK (tableid IN (1, 2)),
-      FOREIGN KEY (attributeid) REFERENCES dynamic_attributes(id)
     );

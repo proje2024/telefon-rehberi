@@ -93,7 +93,7 @@ class DynamicColumnData(Base):
     __tablename__ = "dynamic_data"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    attributeid = Column(Text, nullable=True)
+    attributeid = Column(Integer, ForeignKey('dynamic_attributes.id', ondelete='CASCADE'), nullable=True)
     tableid = Column(Integer, nullable=False)
     recordid = Column(Integer, nullable=False)
     value = Column(Text, nullable=True)

@@ -720,11 +720,11 @@ async def delete_dynamic_column(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="DynamicColumn not found"
         )
-    else:
-        column_data = db.query(DynamicColumnData).filter(DynamicColumnData.attributeid == column.id).all()
-        if column_data:
-            for datas in column_data:
-                db.delete(datas)
+    
+    # Fetch and delete related data
+    column_data = db.query(DynamicColumnData).filter(DynamicColumnData.attributeid == column.id).all()
+    for data in column_data:
+        db.delete(data)
 
 
     db.delete(column)
