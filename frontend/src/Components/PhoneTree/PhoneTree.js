@@ -1,75 +1,139 @@
-import React, { useState } from 'react';
-import { Tree } from 'antd';
-import { UserOutlined } from '@ant-design/icons';
+import React, { useMemo, useState } from 'react';
 import './PhoneTree.css';  // Import CSS
-
-const PhoneTree = ({ data, searchTerm, onNodeSelect }) => {
-    const [expandedKeys, setExpandedKeys] = useState([]);
-    const [selectedKeys, setSelectedKeys] = useState([]);  // Seçili node'u tutmak için state ekliyoruz
-
-    const filterTree = (nodes, searchTerm) => {
-        const normalizedSearchTerm = searchTerm
-            .toLowerCase()
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '');  // Türkçe karakterleri normalize et
-    
-        return nodes
-            .map((node) => {
-                const normalizedTitle = node.title
-                    .toLowerCase()
-                    .normalize('NFD')
-                    .replace(/[\u0300-\u036f]/g, '');  // Türkçe karakterleri normalize et
-    
-                const matchesSearch = normalizedTitle.includes(normalizedSearchTerm);
-    
-                if (node.children) {
-                    const filteredChildren = filterTree(node.children, normalizedSearchTerm);
-                    if (filteredChildren.length > 0 || matchesSearch) {
-                        return { ...node, children: filteredChildren };
-                    }
-                } else if (matchesSearch) {
-                    return { ...node };
-                }
-                return null;
-            })
-            .filter((node) => node !== null);
-    };
-    
-    const filteredData = searchTerm ? filterTree(data, searchTerm) : data;
-
-    const onSelect = (selectedKeys, info) => {
-        onNodeSelect(info.node);
-        const key = info.node.key;
-        const expanded = expandedKeys.includes(key);
-        const newExpandedKeys = expanded
-            ? expandedKeys.filter(k => k !== key)
-            : [...expandedKeys, key];
-
-        setExpandedKeys(newExpandedKeys);
-        setSelectedKeys([key]);  // Sadece son tıklanan node'u seçili yap
-    };
-
-    const onExpand = (expandedKeys) => {
-        setExpandedKeys(expandedKeys);
-    };
-
-    return (
-        <div className="custom-tree-container">
-            <Tree
-                multiple={false}  // Birden fazla node seçimi engellendi
-                defaultExpandAll
-                treeData={filteredData}
-                showIcon
-                icon={<UserOutlined style={{ color: 'white' }} />}
-                onSelect={onSelect}
-                onExpand={onExpand}
-                selectedKeys={selectedKeys}  // Seçili olan node'un key'ini belirt
-                className="custom-tree"
-                blockNode
-                style={{backgroundColor: '#395B64'}}
-            />
-        </div>
-    );
+import { Input, Tree } from 'antd';
+const { Search } = Input;
+const x = 3;
+const y = 2;
+const z = 1;
+const defaultData = [];
+const generateData = (_level, _preKey, _tns) => {
+  const preKey = _preKey || '0';
+  const tns = _tns || defaultData;
+  const children = [];
+  for (let i = 0; i < x; i++) {
+    const key = `${preKey}-${i}`;
+    tns.push({
+      title: key,
+      key,
+    });
+    if (i < y) {
+      children.push(key);
+    }
+  }
+  if (_level < 0) {
+    return tns;
+  }
+  const level = _level - 1;
+  children.forEach((key, index) => {
+    tns[index].children = [];
+    return generateData(level, key, tns[index].children);
+  });
 };
+generateData(z);
+const dataList = [];
+const generateList = (data) => {
+    for (let i = 0; i < data.length; i++) {
+      const node = data[i];
+      const { key } = node;
+      dataList.push({
+        key,
+        title: key,
+      });
+      if (node.children) {
+        generateList(node.children);
+      }
+    }
+  };
 
-export default PhoneTree;
+generateList(defaultData);
+
+const getParentKey = (key, tree) => {
+    let parentKey;
+    for (let i = 0; i < tree.length; i++) {
+      const node = tree[i];
+      if (node.children) {
+        if (node.children.some((item) => item.key === key)) {
+          parentKey = node.key;
+        } else if (getParentKey(key, node.children)) {
+          parentKey = getParentKey(key, node.children);
+        }
+      }
+    }
+    return parentKey;
+  };
+
+const PhoneTree = () => {
+    const [expandedKeys, setExpandedKeys] = useState([]);
+    const [searchValue, setSearchValue] = useState('');
+    const [autoExpandParent, setAutoExpandParent] = useState(true);
+    const onExpand = (newExpandedKeys) => {
+      setExpandedKeys(newExpandedKeys);
+      setAutoExpandParent(true);
+    };
+    const onChange = (e) => {
+      const { value } = e.target;
+      const newExpandedKeys = dataList
+        .map((item) => {
+          if (item.title.indexOf(value) > -1) {
+            return getParentKey(item.key, defaultData);
+          }
+          return null;
+        })
+        .filter((item, i, self) => !!(item && self.indexOf(item) === i));
+      setExpandedKeys(newExpandedKeys);
+      setSearchValue(value);
+      setAutoExpandParent(true);
+    };
+    const treeData = useMemo(() => {
+      const loop = (data) =>
+        data.map((item) => {
+          const strTitle = item.title;
+          const index = strTitle.indexOf(searchValue);
+          const beforeStr = strTitle.substring(0, index);
+          const afterStr = strTitle.slice(index + searchValue.length);
+          const title =
+            index > -1 ? (
+              <span key={item.key}>
+                {beforeStr}
+                <span className="site-tree-search-value">{searchValue}</span>
+                {afterStr}
+              </span>
+            ) : (
+              <span key={item.key}>{strTitle}</span>
+            );
+          if (item.children) {
+            return {
+              title,
+              key: item.key,
+              children: loop(item.children),
+            };
+          }
+          return {
+            title,
+            key: item.key,
+          };
+        });
+      return loop(defaultData);
+    }, [searchValue]);
+    return (
+      <div>
+        <Search
+          style={{
+            marginBottom: 8,
+          }}
+          placeholder="Arama yapın..."
+          onChange={onChange}
+        />
+        <Tree
+          defaultExpandAll
+          defaultExpandParent
+          onExpand={onExpand}
+          expandedKeys={expandedKeys}
+          autoExpandParent={autoExpandParent}
+          treeData={treeData}
+          style={{backgroundColor: '#395B64'}}
+        />
+      </div>
+    );
+  };
+  export default PhoneTree;

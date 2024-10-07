@@ -46,13 +46,11 @@ def insert_data_into_db(engine, data):
         result = connection.execute(check_query, {"ataid": ataid})
         return result.scalar() > 0
 
-    pending_records = []  # Bağlı olduğu ataId olmayan kayıtları bekletmek için
+    pending_records = [] 
 
     with engine.connect() as connection:
-        # Start a transaction
         with connection.begin():
             try:
-                # İlk olarak root node olan verileri kontrolsüz ekle
                 for item in data:
                     if (item['id'] == 1) or (item['ataId'] is None):
                         insert_root = text("""
@@ -75,23 +73,18 @@ def insert_data_into_db(engine, data):
                             'hiyerAd': item['hiyerAd']
                         }
 
-                        # Root verilerini ekle
                         connection.execute(insert_root, values_root)
                         print(f"Inserted root item with id {item['id']}: {item['ad']}")
 
-                # Sonra diğer kayıtları ataId'ye göre kontrol ederek ekle
                 for item in data:
                     if (item['id'] == 1 and item['ataId'] is None) or (item['id'] == 100 and item['ataId'] is None):
-                        # Root node'ları zaten ekledik, bunları atla
                         continue
 
                     if not is_ataid_in_db(connection, item['ataId']):
-                        # Eğer ataId veritabanında yoksa, bu kaydı beklet
                         print(f"Pending Item: {item['id'], item['ad'], item['ataId']}")
                         pending_records.append(item)
                         continue
 
-                    # Kontrolü geçen kayıtları ekle
                     insert_directory = text("""
                         INSERT INTO directory ("id", "hiyerId", "ataId", "adi", "hiyerAd", "internal_number", "ip_number", "mailbox", 
                                                 "visibility", "visibilityForSubDirectory", "ip_number_subscription_id", "internal_number_subscription_id")
@@ -115,14 +108,11 @@ def insert_data_into_db(engine, data):
                     connection.execute(insert_directory, values_directory)
                     print(f"Inserted nodes {item['id']}: {item['ad']}")
 
-
-                # Pending (bekleyen) kayıtları tekrar deneyerek eklemeye çalış
                 retry = True
                 while retry and pending_records:
                     retry = False
                     for item in pending_records[:]:
                         if is_ataid_in_db(connection, item['ataId']):
-                            # Eğer bağlı olduğu ataId artık mevcutsa, kaydı ekle
                             insert_directory = text("""
                             INSERT INTO directory ("id", "hiyerId", "ataId", "adi", "hiyerAd", "internal_number", "ip_number", "mailbox", 
                                                     "visibility", "visibilityForSubDirectory", "ip_number_subscription_id", "internal_number_subscription_id")
@@ -143,12 +133,11 @@ def insert_data_into_db(engine, data):
                                 'hiyerAd': item['hiyerAd']
                             }
 
-                            # Kayıt artık eklenebilir, aynı kontrol burada da yapılır
                             connection.execute(insert_directory, values_directory)
                             print(f"Inserted pending nodes {item['id']}: {item['ad']}")
 
                             pending_records.remove(item)
-                            retry = True  # Eğer kayıt eklendiyse, tekrar bekleyen kayıtları kontrol et
+                            retry = True  
 
             except Exception as e:
                 print(f"Bir hata oluştu: {e}")

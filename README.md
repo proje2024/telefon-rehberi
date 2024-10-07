@@ -210,3 +210,6 @@ Oluşturduğunuz docker image'leri minikube içindeki docker ortamına yükleyin
    ```bash
    kubectl logs <pod-name>
    ```
+kubectl delete deployment --all 
+kubectl delete service --all 
+kubectl delete pvc --all

@@ -95,15 +95,6 @@ function Home() {
     return (
         <Container className="home-main-container">
             <div className="phone-tree-container">
-                <TextField
-                    className="custom-textfield"
-                    variant="outlined"
-                    placeholder="Arama yapın..."
-                    size="small"
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    value={searchTerm}
-                    fullWidth
-                />
                 {loading ? (
                     <CircularProgress />
                 ) : error ? (
