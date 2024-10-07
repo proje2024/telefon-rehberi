@@ -39,33 +39,35 @@ def create_db_engine():
 SLEEP_INTERVAL = int(os.getenv("SLEEP_INTERVAL"))
 
 def insert_data_into_db(engine, data):
-    print("Veriler işleniyor...")
-    
-    # ataId'si None olan veriyi bul
-    null_ataId_items = [item for item in data if item['ataId'] is None]
-    first_insert_items = [item for item in data if item['id'] == 1]  # id'si 1 olan item
-    other_items = [item for item in data if item['ataId'] is not None and item['id'] != 1]
-    
-    # Sıralama işlemi: diğerlerini ataId'ye göre sırala
-    sorted_other_items = sorted(other_items, key=lambda x: x['ataId'])
+    def is_ataid_in_db(connection, ataid):
+        if ataid is None:
+            return True
+        check_query = text("SELECT COUNT(*) FROM directory WHERE id = :ataid")
+        result = connection.execute(check_query, {"ataid": ataid})
+        return result.scalar() > 0
+
+    pending_records = []  # Bağlı olduğu ataId olmayan kayıtları bekletmek için
 
     with engine.connect() as connection:
+        # Start a transaction
         with connection.begin():
             try:
-                # 1. Öncelikle ataId'si None olan veriyi ekle
-                for item in null_ataId_items:
-                    # Kayıt zaten mevcut mu kontrolü
-                    check_exists = text("SELECT COUNT(*) FROM directory WHERE id = :id")
-                    result = connection.execute(check_exists, {'id': item['id']}).scalar()
-
-                    if result == 0:
-                        insert_directory = text("""
-                        INSERT INTO directory ("id", "hiyerId", "ataId", "adi", "hiyerAd", "internal_number", "ip_number", "mailbox", 
-                                                "visibility", "visibilityForSubDirectory", "ip_number_subscription_id", "internal_number_subscription_id")
-                        VALUES (:id, :hiyerId, :ataId, :adi, :hiyerAd, '', '', '', 1, 1, 1, 1)
+                # İlk olarak root node olan verileri kontrolsüz ekle
+                for item in data:
+                    if (item['id'] == 1) or (item['ataId'] is None):
+                        insert_root = text("""
+                            INSERT INTO directory ("id", "hiyerId", "ataId", "adi", "hiyerAd", "internal_number", "ip_number", "mailbox", 
+                                                    "visibility", "visibilityForSubDirectory", "ip_number_subscription_id", "internal_number_subscription_id")
+                            VALUES (:id, :hiyerId, :ataId, :adi, :hiyerAd, '', '', '', 1, 1, 1, 1)
+                            ON CONFLICT (id) 
+                            DO UPDATE SET
+                                "hiyerId" = EXCLUDED."hiyerId",
+                                "ataId" = EXCLUDED."ataId",
+                                "adi" = EXCLUDED."adi",
+                                "hiyerAd" = EXCLUDED."hiyerAd"
                         """)
 
-                        values_directory = {
+                        values_root = {
                             'id': item['id'],
                             'hiyerId': item['hiyerId'],
                             'ataId': item['ataId'],
@@ -73,25 +75,36 @@ def insert_data_into_db(engine, data):
                             'hiyerAd': item['hiyerAd']
                         }
 
-                        connection.execute(insert_directory, values_directory)
-                        print(f"Yeni Kayıt Eklendi: {item['id'], item['ad'], item['ataId']}")
-                    else:
-                        print(f"Bu kayıt zaten var: {item['id'], item['ad'], item['ataId']}")
+                        # Root verilerini ekle
+                        connection.execute(insert_root, values_root)
+                        print(f"Inserted root item with id {item['id']}: {item['ad']}")
 
-                # 2. Daha sonra id=1, ataId=1, hiyerId=1 olan veriyi ekle
-                for item in first_insert_items:
-                    # Kayıt zaten mevcut mu kontrolü
-                    check_exists = text("SELECT COUNT(*) FROM directory WHERE id = :id")
-                    result = connection.execute(check_exists, {'id': item['id']}).scalar()
+                # Sonra diğer kayıtları ataId'ye göre kontrol ederek ekle
+                for item in data:
+                    if (item['id'] == 1 and item['ataId'] is None) or (item['id'] == 100 and item['ataId'] is None):
+                        # Root node'ları zaten ekledik, bunları atla
+                        continue
 
-                    if result == 0:
-                        insert_directory = text("""
+                    if not is_ataid_in_db(connection, item['ataId']):
+                        # Eğer ataId veritabanında yoksa, bu kaydı beklet
+                        print(f"Pending Item: {item['id'], item['ad'], item['ataId']}")
+                        pending_records.append(item)
+                        continue
+
+                    # Kontrolü geçen kayıtları ekle
+                    insert_directory = text("""
                         INSERT INTO directory ("id", "hiyerId", "ataId", "adi", "hiyerAd", "internal_number", "ip_number", "mailbox", 
                                                 "visibility", "visibilityForSubDirectory", "ip_number_subscription_id", "internal_number_subscription_id")
                         VALUES (:id, :hiyerId, :ataId, :adi, :hiyerAd, '', '', '', 1, 1, 1, 1)
-                        """)
+                        ON CONFLICT (id) 
+                        DO UPDATE SET
+                            "hiyerId" = EXCLUDED."hiyerId",
+                            "ataId" = EXCLUDED."ataId",
+                            "adi" = EXCLUDED."adi",
+                            "hiyerAd" = EXCLUDED."hiyerAd"
+                    """)
 
-                        values_directory = {
+                    values_directory = {
                             'id': item['id'],
                             'hiyerId': item['hiyerId'],
                             'ataId': item['ataId'],
@@ -99,36 +112,43 @@ def insert_data_into_db(engine, data):
                             'hiyerAd': item['hiyerAd']
                         }
 
-                        connection.execute(insert_directory, values_directory)
-                        print(f"Yeni Kayıt Eklendi: {item['id'], item['ad'], item['ataId']}")
-                    else:
-                        print(f"Bu kayıt zaten var: {item['id'], item['ad'], item['ataId']}")
+                    connection.execute(insert_directory, values_directory)
+                    print(f"Inserted nodes {item['id']}: {item['ad']}")
 
-                # 3. Son olarak ataId'ye göre sıralanmış verileri ekle
-                for item in sorted_other_items:
-                    # Kayıt zaten mevcut mu kontrolü
-                    check_exists = text("SELECT COUNT(*) FROM directory WHERE id = :id")
-                    result = connection.execute(check_exists, {'id': item['id']}).scalar()
 
-                    if result == 0:
-                        insert_directory = text("""
-                        INSERT INTO directory ("id", "hiyerId", "ataId", "adi", "hiyerAd", "internal_number", "ip_number", "mailbox", 
-                                                "visibility", "visibilityForSubDirectory", "ip_number_subscription_id", "internal_number_subscription_id")
-                        VALUES (:id, :hiyerId, :ataId, :adi, :hiyerAd, '', '', '', 1, 1, 1, 1)
-                        """)
+                # Pending (bekleyen) kayıtları tekrar deneyerek eklemeye çalış
+                retry = True
+                while retry and pending_records:
+                    retry = False
+                    for item in pending_records[:]:
+                        if is_ataid_in_db(connection, item['ataId']):
+                            # Eğer bağlı olduğu ataId artık mevcutsa, kaydı ekle
+                            insert_directory = text("""
+                            INSERT INTO directory ("id", "hiyerId", "ataId", "adi", "hiyerAd", "internal_number", "ip_number", "mailbox", 
+                                                    "visibility", "visibilityForSubDirectory", "ip_number_subscription_id", "internal_number_subscription_id")
+                            VALUES (:id, :hiyerId, :ataId, :adi, :hiyerAd, '', '', '', 1, 1, 1, 1)
+                            ON CONFLICT (id) 
+                            DO UPDATE SET
+                                "hiyerId" = EXCLUDED."hiyerId",
+                                "ataId" = EXCLUDED."ataId",
+                                "adi" = EXCLUDED."adi",
+                                "hiyerAd" = EXCLUDED."hiyerAd"
+                            """)
 
-                        values_directory = {
-                            'id': item['id'],
-                            'hiyerId': item['hiyerId'],
-                            'ataId': item['ataId'],
-                            'adi': item['ad'],
-                            'hiyerAd': item['hiyerAd']
-                        }
+                            values_directory = {
+                                'id': item['id'],
+                                'hiyerId': item['hiyerId'],
+                                'ataId': item['ataId'],
+                                'adi': item['ad'],
+                                'hiyerAd': item['hiyerAd']
+                            }
 
-                        connection.execute(insert_directory, values_directory)
-                        print(f"Yeni Kayıt Eklendi: {item['id'], item['ad'], item['ataId']}")
-                    else:
-                        print(f"Bu kayıt zaten var: {item['id'], item['ad'], item['ataId']}")
+                            # Kayıt artık eklenebilir, aynı kontrol burada da yapılır
+                            connection.execute(insert_directory, values_directory)
+                            print(f"Inserted pending nodes {item['id']}: {item['ad']}")
+
+                            pending_records.remove(item)
+                            retry = True  # Eğer kayıt eklendiyse, tekrar bekleyen kayıtları kontrol et
 
             except Exception as e:
                 print(f"Bir hata oluştu: {e}")
