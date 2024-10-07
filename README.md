@@ -8,8 +8,6 @@ Dinamik kolon yönetimi yapabilirsiniz.Sayfanın sağ üstünde yer alan Dinamik
 
 Sayfanın sağ üstünde yer alan "Veritabanını Yedekle" ve "Veritabanını Geri Yükle" butonları ile veraitabanının backup'ını alıp restore edebilirsiniz. Admin panelde yer alan "Abonelik Yönetimi" butonu ile birlikte abonelik türlerinin ekleme, güncelleme ve silme işlemlerini gerçekleştirebilirsiniz.
 
-Projede backup mekanizması bulunmaktadır. Her gün sistemin backup dosyası alınmaktadır. 7 gün öncesine ait backup dosyaları da silinmektedir. backend/api/db/backup_db.py yolundaki backup_db.py dosyasından bu mekanizmayı inceleyebilirsiniz.
-
 ## Dikkat Edilmesi Gerekenler
 
 telefon-rehberi/kubernetes/frontend/env dosyası içerisinde yer alan değişkenleri kullanmak istediğiniz değişken adına göre değiştirebilirsiniz.
